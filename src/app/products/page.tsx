@@ -1,5 +1,5 @@
 import prisma from '../../lib/prisma';
-import ProductCard from '../../components/ProductCard';
+import { ProductCard } from '../../components/ProductCard';
 import Link from 'next/link';
 import { Filter, Sparkles, Search, SlidersHorizontal } from 'lucide-react';
 
