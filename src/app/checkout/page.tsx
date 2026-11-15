@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import confetti from 'canvas-confetti';
 import {
   ShieldCheck,
