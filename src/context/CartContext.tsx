@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, ProductVariation } from '@/types';
+import { Product } from '../types';
 
 export interface LocalCartItem {
   id: string;
