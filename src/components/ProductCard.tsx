@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Product } from '@/types';
-import { useCart } from '@/context/CartContext';
+import { Product } from '../types';
+import { useCart } from '../context/CartContext';
 import { Heart, ShoppingBag, Eye, Star } from 'lucide-react';
 
 interface ProductCardProps {
