@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { clearAuthCookie } from '@/lib/auth';
+import { sendSMS } from '../../../../lib/sms';
 
 export async function POST(req: NextRequest) {
   const res = NextResponse.json({
