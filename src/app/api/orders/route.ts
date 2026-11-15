@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../lib/prisma';
 import { getAuthUser } from '../../../lib/auth';
-import razorpay from '../../../lib/razorpay';
+import { createRazorpayOrder } from '../../../lib/razorpay';
 
 export async function GET(req: NextRequest) {
   try {
