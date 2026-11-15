@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Product, ProductVariation } from '@/types';
+import { Product, ProductVariation } from '../../../types';
 import { useCart } from '../../../context/CartContext';
 import { ProductCard } from '../../../components/ProductCard';
 import {
