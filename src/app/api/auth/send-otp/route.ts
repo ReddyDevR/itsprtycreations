@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateNumericOtp, sendSmsOtp } from '@/lib/sms';
+import { generateNumericOtp, sendSmsOtp } from '../../../../lib/sms';
 
 export async function POST(req: NextRequest) {
   try {
