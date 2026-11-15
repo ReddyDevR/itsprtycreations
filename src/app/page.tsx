@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import prisma from '@/lib/prisma';
-import { ProductCard } from '@/components/ProductCard';
+import prisma from '../lib/prisma';
+import ProductCard from '../components/ProductCard';
 import {
   Sparkles,
   ArrowRight,
