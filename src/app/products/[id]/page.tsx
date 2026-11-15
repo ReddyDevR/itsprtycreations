@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import prisma from '@/lib/prisma';
+import prisma from '../../../lib/prisma';
 import { ProductDetailClient } from './ProductDetailClient';
 
 export const revalidate = 0; // Dynamic from DB
