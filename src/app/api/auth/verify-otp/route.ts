@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { verifySmsOtp } from '@/lib/sms';
-import { signToken, setAuthCookie } from '@/lib/auth';
-
+import prisma from '../../../../lib/prisma';
+import { sendSMS } from '../../../../lib/sms';
+import { signToken, setAuthCookie } from '../../../../lib/auth';
 export async function POST(req: NextRequest) {
   try {
     const { phone, otp, name } = await req.json();
