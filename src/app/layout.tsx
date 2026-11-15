@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { AuthProvider } from '@/context/AuthContext';
-import { CartProvider } from '@/context/CartContext';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { CartDrawer } from '@/components/CartDrawer';
+import { AuthProvider } from '../context/AuthContext';
+import { CartProvider } from '../context/CartContext';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import CartDrawer from '../components/CartDrawer';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
