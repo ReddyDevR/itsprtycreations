@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 import { getAuthUser } from '../../../lib/auth';
-import { createSlug } from '../../../lib/slug';
+import { slugify } from '../../../lib/slug';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
