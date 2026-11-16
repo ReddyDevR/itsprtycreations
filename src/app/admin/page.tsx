@@ -858,30 +858,51 @@ const handleInitializeCategories = async () => {
   required
   value={newCategory}
   onChange={(e) => setNewCategory(e.target.value)}
-  disabled={!categories.some((c) => c.isActive)}
+  disabled={!categories.some((c) => c.isActive === true)}
   className="w-full px-3 py-2.5 text-xs border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white disabled:bg-stone-100 disabled:cursor-not-allowed"
 >
-  <option value="" disabled>
-    {categories.some((c) => c.isActive)
-      ? 'Select Greeting Category'
-      : 'No active categories available'}
+  <option value="">
+    Select Greeting Category
   </option>
 
   {categories
-    .filter((c) => c.isActive === true)
-    .sort((a, b) => a.displayOrder - b.displayOrder)
-    .map((c) => (
-      <option key={c.id} value={c.id}>
-        {c.name}
+    .filter((category) => category.isActive === true)
+    .sort(
+      (a, b) =>
+        Number(a.displayOrder ?? 0) -
+        Number(b.displayOrder ?? 0)
+    )
+    .map((category) => (
+      <option
+        key={category.id}
+        value={category.id}
+      >
+        {category.name}
       </option>
     ))}
 </select>
 
-{!categories.some((c) => c.isActive) && (
-  <p className="text-[11px] text-red-600 mt-2">
-    No active greeting categories found.
-    Please activate a category in Category Management.
-  </p>
+{categories.filter((c) => c.isActive === true).length === 0 && (
+  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+
+    <p className="text-xs font-semibold text-amber-800">
+      No Active Greeting Categories
+    </p>
+
+    <p className="text-[11px] text-amber-700 mt-1">
+      Please add a new category or activate an existing category
+      from Category Management.
+    </p>
+
+    <button
+      type="button"
+      onClick={() => setActiveTab('categories')}
+      className="mt-3 rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 transition-colors"
+    >
+      Manage Greeting Categories →
+    </button>
+
+  </div>
 )}
                 </div>
 
@@ -1358,54 +1379,299 @@ const handleInitializeCategories = async () => {
           </div>
         )}
 
-        {/* TAB 4: CATEGORIES MANAGEMENT */}
-        {activeTab === 'categories' && (
-          <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
-            <div className="flex items-center justify-between pb-4 border-b border-stone-100">
-              <div>
-                <h3 className="font-serif font-bold text-lg text-stone-900">Greeting Categories</h3>
-                <p className="text-xs text-stone-500">
-                  Manage the 14 dynamic greeting card categories. Activate or deactivate any category anytime.
-                </p>
-              </div>
-            </div>
+       {/* TAB 4: CATEGORIES MANAGEMENT */}
+{activeTab === 'categories' && (
+  <div className="space-y-6">
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categories.map((c) => (
-                <div
-                  key={c.id}
-                  className="p-4 rounded-2xl border border-stone-200 flex items-center justify-between gap-3 bg-stone-50/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={c.image || 'https://via.placeholder.com/40'}
-                      alt={c.name}
-                      className="w-10 h-10 rounded-full object-cover shrink-0"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-xs text-stone-900">{c.name}</h4>
-                      <p className="text-[10px] text-stone-400">
-                        {c._count?.products || 0} products &bull; {c.slug}
-                      </p>
-                    </div>
+    {/* HEADER */}
+    <div className="bg-white rounded-3xl border border-stone-200 p-6">
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+        <div>
+          <h3 className="font-serif font-bold text-2xl text-stone-900">
+            Greeting Categories
+          </h3>
+
+          <p className="text-sm text-stone-500 mt-1">
+            Create, manage and organize all greeting card categories.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleInitializeCategories}
+          className="px-5 py-3 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-700 transition-all"
+        >
+          <Plus className="w-4 h-4 inline mr-2" />
+          Initialize Default 14 Categories
+        </button>
+
+      </div>
+
+      {/* CATEGORY STATISTICS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+
+        <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200">
+          <p className="text-xs text-stone-500 font-semibold">
+            Total Categories
+          </p>
+
+          <h3 className="text-3xl font-bold text-stone-900 mt-2">
+            {categories.length}
+          </h3>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100">
+          <p className="text-xs text-emerald-700 font-semibold">
+            Active Categories
+          </p>
+
+          <h3 className="text-3xl font-bold text-emerald-700 mt-2">
+            {categories.filter(c => c.isActive).length}
+          </h3>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-red-50 border border-red-100">
+          <p className="text-xs text-red-700 font-semibold">
+            Inactive Categories
+          </p>
+
+          <h3 className="text-3xl font-bold text-red-700 mt-2">
+            {categories.filter(c => !c.isActive).length}
+          </h3>
+        </div>
+
+      </div>
+
+    </div>
+
+    {/* ADD / EDIT CATEGORY */}
+    <div className="bg-white rounded-3xl border border-stone-200 p-6">
+
+      <h3 className="font-bold text-lg text-stone-900 mb-5">
+        {editingCategory
+          ? 'Edit Greeting Category'
+          : 'Add New Greeting Category'}
+      </h3>
+
+      <form
+        onSubmit={handleSaveCategory}
+        className="grid grid-cols-1 md:grid-cols-2 gap-5"
+      >
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-stone-700">
+            Category Name *
+          </label>
+
+          <input
+            required
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+            placeholder="Example: Baby Shower Greetings"
+            className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-2 text-stone-700">
+            Category Image URL
+          </label>
+
+          <input
+            type="url"
+            value={categoryImage}
+            onChange={(e) => setCategoryImage(e.target.value)}
+            placeholder="https://example.com/category.jpg"
+            className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+
+          <label className="block text-xs font-bold mb-2 text-stone-700">
+            Category Description
+          </label>
+
+          <textarea
+            value={categoryDescription}
+            onChange={(e) => setCategoryDescription(e.target.value)}
+            placeholder="Enter category description..."
+            rows={3}
+            className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+          />
+
+        </div>
+
+        <div className="md:col-span-2 flex flex-wrap gap-3">
+
+          <button
+            type="submit"
+            disabled={categorySaving}
+            className="px-6 py-3 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 disabled:opacity-50"
+          >
+            {categorySaving
+              ? 'Saving...'
+              : editingCategory
+                ? 'Update Category'
+                : 'Create Category'}
+          </button>
+
+          {editingCategory && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCategory(null);
+                setCategoryName('');
+                setCategoryDescription('');
+                setCategoryImage('');
+              }}
+              className="px-6 py-3 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold"
+            >
+              Cancel Edit
+            </button>
+          )}
+
+        </div>
+
+      </form>
+
+    </div>
+
+    {/* CATEGORY FILTER */}
+    <div className="bg-white rounded-3xl border border-stone-200 p-6">
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+
+        <h3 className="font-bold text-lg text-stone-900">
+          Manage All Categories
+        </h3>
+
+        <div className="flex flex-wrap gap-2">
+
+          {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((filter) => (
+
+            <button
+              key={filter}
+              type="button"
+              onClick={() => setCategoryFilter(filter)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                categoryFilter === filter
+                  ? 'bg-stone-900 text-white'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              }`}
+            >
+              {filter}
+            </button>
+
+          ))}
+
+        </div>
+
+      </div>
+
+      {/* CATEGORY LIST */}
+      {categories.filter((c) =>
+        categoryFilter === 'ALL'
+          ? true
+          : categoryFilter === 'ACTIVE'
+            ? c.isActive
+            : !c.isActive
+      ).length === 0 ? (
+
+        <div className="text-center py-12">
+
+          <Layers className="w-10 h-10 mx-auto mb-3 text-stone-300" />
+
+          <p className="font-bold text-stone-700">
+            No Categories Found
+          </p>
+
+          <p className="text-xs text-stone-500 mt-2">
+            Create a new category or initialize the default categories.
+          </p>
+
+        </div>
+
+      ) : (
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          {categories
+            .filter((c) =>
+              categoryFilter === 'ALL'
+                ? true
+                : categoryFilter === 'ACTIVE'
+                  ? c.isActive
+                  : !c.isActive
+            )
+            .map((c) => (
+
+              <div
+                key={c.id}
+                className="border border-stone-200 rounded-2xl p-4 hover:shadow-md transition-all"
+              >
+
+                <div className="flex items-center gap-3 mb-4">
+
+                  <img
+                    src={c.image || 'https://placehold.co/80x80?text=LTS'}
+                    alt={c.name}
+                    className="w-14 h-14 rounded-xl object-cover bg-stone-100"
+                  />
+
+                  <div className="min-w-0">
+
+                    <h4 className="font-bold text-sm text-stone-900">
+                      {c.name}
+                    </h4>
+
+                    <p className="text-[10px] text-stone-400 mt-1">
+                      {c._count?.products || 0} Products
+                    </p>
+
                   </div>
 
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+
                   <button
+                    type="button"
                     onClick={() => handleToggleCategory(c.id, c.isActive)}
-                    className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                    className={`px-3 py-2 rounded-lg text-xs font-bold ${
                       c.isActive
-                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                        : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {c.isActive ? 'Active' : 'Inactive'}
                   </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
+                  <button
+                    type="button"
+                    onClick={() => handleEditCategory(c)}
+                    className="px-3 py-2 rounded-lg bg-stone-100 text-stone-700 text-xs font-bold hover:bg-stone-200"
+                  >
+                    <Edit2 className="w-3 h-3 inline mr-1" />
+                    Edit
+                  </button>
+
+                </div>
+
+              </div>
+
+            ))}
+
+        </div>
+
+      )}
+
+    </div>
+
+  </div>
+)}
         {/* TAB 5: ORDERS MANAGEMENT */}
         {activeTab === 'orders' && (
           <div className="space-y-4">
