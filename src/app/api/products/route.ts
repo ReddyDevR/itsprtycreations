@@ -103,12 +103,38 @@ export async function POST(req: NextRequest) {
       variations,
     } = body;
 
-    if (!title || !categoryId || sellingPrice === undefined) {
-      return NextResponse.json(
-        { error: 'Title, category, and selling price are required' },
-        { status: 400 }
-      );
-    }
+    if (
+  !title?.trim() ||
+  !categoryId ||
+  sellingPrice === undefined ||
+  Number(sellingPrice) <= 0
+) {
+  return NextResponse.json(
+    { error: 'Valid product title, category, and selling price are required' },
+    { status: 400 }
+  );
+}
+
+// Verify selected greeting category
+const selectedCategory = await prisma.category.findUnique({
+  where: {
+    id: categoryId,
+  },
+});
+
+if (!selectedCategory) {
+  return NextResponse.json(
+    { error: 'Selected greeting category does not exist.' },
+    { status: 400 }
+  );
+}
+
+if (!selectedCategory.isActive) {
+  return NextResponse.json(
+    { error: 'This greeting category is inactive. Please select an active category.' },
+    { status: 400 }
+  );
+}
 
     if (!Array.isArray(images) || images.length < 1 || images.length > 500) {
       return NextResponse.json({ error: 'Add between 1 and 500 product images.' }, { status: 400 });
