@@ -109,15 +109,39 @@ const [imageLimit, setImageLimit] = useState(6);
       const prodData = await prodRes.json();
       if (prodData.success) setProducts(prodData.products);
 
-      // 3. Categories
-      const catRes = await fetch('/api/categories?all=true');
-      const catData = await catRes.json();
-      if (catData.success) {
-        setCategories(catData.categories);
-        if (catData.categories.length > 0 && !newCategory) {
-          setNewCategory(catData.categories[0].id);
-        }
-      }
+     // 3. Categories - Reliable category loading
+const catRes = await fetch('/api/categories?all=true', {
+  cache: 'no-store',
+});
+
+const catData = await catRes.json();
+
+if (!catRes.ok || !catData.success) {
+  throw new Error(catData.error || 'Failed to load greeting categories');
+}
+
+const loadedCategories = Array.isArray(catData.categories)
+  ? catData.categories
+  : [];
+
+setCategories(loadedCategories);
+
+// Only select active categories for product creation
+const activeCategories = loadedCategories.filter(
+  (category: Category) => category.isActive === true
+);
+
+setNewCategory((previousCategory) => {
+  const previousIsValid = activeCategories.some(
+    (category: Category) => category.id === previousCategory
+  );
+
+  if (previousIsValid) return previousCategory;
+
+  return activeCategories.length > 0
+    ? activeCategories[0].id
+    : '';
+});
 
       // 4. Orders
       const ordRes = await fetch('/api/orders');
@@ -704,19 +728,38 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
-                    Greeting Category *
-                  </label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white"
-                  >
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+  Greeting Category *
+</label>
+
+<select
+  required
+  value={newCategory}
+  onChange={(e) => setNewCategory(e.target.value)}
+  disabled={!categories.some((c) => c.isActive)}
+  className="w-full px-3 py-2.5 text-xs border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white disabled:bg-stone-100 disabled:cursor-not-allowed"
+>
+  <option value="" disabled>
+    {categories.some((c) => c.isActive)
+      ? 'Select Greeting Category'
+      : 'No active categories available'}
+  </option>
+
+  {categories
+    .filter((c) => c.isActive === true)
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map((c) => (
+      <option key={c.id} value={c.id}>
+        {c.name}
+      </option>
+    ))}
+</select>
+
+{!categories.some((c) => c.isActive) && (
+  <p className="text-[11px] text-red-600 mt-2">
+    No active greeting categories found.
+    Please activate a category in Category Management.
+  </p>
+)}
                 </div>
 
                 <div>
