@@ -67,8 +67,12 @@ export default function AdminDashboardPage() {
   const [newDescription, setNewDescription] = useState('');
   const [newDetails, setNewDetails] = useState('');
   const [newImageUrls, setNewImageUrls] = useState<string[]>([]);
-  const [uploadingImages, setUploadingImages] = useState(false);
-  const [imageUrlInput, setImageUrlInput] = useState('');
+const [uploadingImages, setUploadingImages] = useState(false);
+const [imageUrlInput, setImageUrlInput] = useState('');
+
+// Product Image Management
+const [imageSource, setImageSource] = useState<'device' | 'url'>('device');
+const [imageLimit, setImageLimit] = useState(6);
   const [newStock, setNewStock] = useState('100');
   const [newIsFeatured, setNewIsFeatured] = useState(false);
   const [newIsBestSeller, setNewIsBestSeller] = useState(false);
@@ -147,57 +151,135 @@ export default function AdminDashboardPage() {
     setTimeout(() => setFeedbackMsg(null), 5000);
   };
 
-  // Upload up to 500 product images to Cloudinary and keep square previews.
-  const handleProductImageFiles = async (files: FileList | null) => {
-    if (!files?.length) return;
-    const selected = Array.from(files);
-    if (newImageUrls.length + selected.length > 500) {
-      notify('A product can contain a maximum of 500 images.', true);
-      return;
-    }
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      notify('Configure NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET first.', true);
-      return;
-    }
-    setUploadingImages(true);
-    try {
-      const uploaded: string[] = [];
-      for (const file of selected) {
-        if (!file.type.startsWith('image/')) continue;
-        if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name} exceeds the 10 MB per-image limit.`);
-        const form = new FormData();
-        form.append('file', file);
-        form.append('upload_preset', uploadPreset);
-        form.append('folder', 'store-products');
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: form });
-        const result = await response.json();
-        if (!response.ok || !result.secure_url) throw new Error(result.error?.message || `Upload failed for ${file.name}`);
-        uploaded.push(result.secure_url);
-      }
-      setNewImageUrls((current) => [...current, ...uploaded]);
-      notify(`${uploaded.length} image(s) uploaded successfully.`);
-    } catch (error: any) {
-      notify(error.message || 'Image upload failed.', true);
-    } finally {
-      setUploadingImages(false);
-    }
-  };
+ // Upload selected product images to Cloudinary (maximum 6).
+const handleProductImageFiles = async (files: FileList | null) => {
+  if (!files?.length) return;
 
+  const selected = Array.from(files);
+
+  if (newImageUrls.length + selected.length > imageLimit) {
+    notify(
+      `You can add only ${imageLimit} images. Already selected: ${newImageUrls.length}.`,
+      true
+    );
+    return;
+  }
+
+  const validFiles = selected.filter((file) =>
+    file.type.startsWith('image/')
+  );
+
+  if (validFiles.length !== selected.length) {
+    notify('Please select valid image files only.', true);
+    return;
+  }
+
+  const oversizedFile = validFiles.find(
+    (file) => file.size > 10 * 1024 * 1024
+  );
+
+  if (oversizedFile) {
+    notify(`${oversizedFile.name} exceeds the 10 MB limit.`, true);
+    return;
+  }
+
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+  if (!cloudName || !uploadPreset) {
+    notify(
+      'Configure Cloudinary environment variables first.',
+      true
+    );
+    return;
+  }
+
+  setUploadingImages(true);
+
+  try {
+    const uploaded: string[] = [];
+
+    for (const file of validFiles) {
+      const form = new FormData();
+
+      form.append('file', file);
+      form.append('upload_preset', uploadPreset);
+      form.append('folder', 'store-products');
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: 'POST',
+          body: form,
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.secure_url) {
+        throw new Error(
+          result.error?.message || `Upload failed: ${file.name}`
+        );
+      }
+
+      uploaded.push(result.secure_url);
+    }
+
+    setNewImageUrls((current) => [...current, ...uploaded]);
+
+    notify(`${uploaded.length} image(s) uploaded successfully.`);
+
+  } catch (error: any) {
+    notify(error.message || 'Image upload failed.', true);
+
+  } finally {
+    setUploadingImages(false);
+  }
+};
   const addProductImageUrl = () => {
-    const url = imageUrlInput.trim();
-    if (!url) return;
-    try { new URL(url); } catch { notify('Enter a valid image URL.', true); return; }
-    if (newImageUrls.length >= 500) { notify('Maximum 500 images allowed.', true); return; }
-    setNewImageUrls((current) => [...current, url]);
-    setImageUrlInput('');
-  };
+  const url = imageUrlInput.trim();
+
+  if (!url) {
+    notify('Please enter an image URL.', true);
+    return;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      throw new Error('Invalid protocol');
+    }
+  } catch {
+    notify('Please enter a valid HTTP or HTTPS image URL.', true);
+    return;
+  }
+
+  if (newImageUrls.length >= imageLimit) {
+    notify(
+      `Maximum ${imageLimit} images allowed.`,
+      true
+    );
+    return;
+  }
+
+  setNewImageUrls((current) => [...current, url]);
+
+  setImageUrlInput('');
+};
 
   // ADD DYNAMIC GREETING CARD (Core Requirement)
   const handleAddDynamicGreeting = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newImageUrls.length === 0) { notify('Please upload or add at least one product image.', true); return; }
+    if (newImageUrls.length === 0) {
+  notify('Please add at least one product image.', true);
+  return;
+}
+
+if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
+  notify(`Maximum ${imageLimit} images are allowed.`, true);
+  return;
+}
     setSubmittingGreeting(true);
 
     try {
@@ -234,7 +316,12 @@ export default function AdminDashboardPage() {
       setNewTitle('');
       setNewDescription('');
       setNewDetails('');
+
       setNewImageUrls([]);
+      setImageUrlInput('');
+
+      setImageSource('device');
+      setImageLimit(6);
 
       loadAllData();
       setActiveTab('products');
