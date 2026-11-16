@@ -47,6 +47,14 @@ export default function AdminDashboardPage() {
   // Products
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+
+// Greeting Category Management
+const [categoryName, setCategoryName] = useState('');
+const [categoryDescription, setCategoryDescription] = useState('');
+const [categoryImage, setCategoryImage] = useState('');
+const [categorySaving, setCategorySaving] = useState(false);
+const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
 
@@ -405,20 +413,135 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
     }
   };
 
-  // TOGGLE CATEGORY ACTIVE STATUS
-  const handleToggleCategory = async (id: string, currentStatus: boolean) => {
-    try {
-      const res = await fetch('/api/categories', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, isActive: !currentStatus }),
-      });
-      if (res.ok) {
-        notify('Category visibility updated');
-        loadAllData();
-      }
-    } catch (e) {}
-  };
+  // ADD / UPDATE GREETING CATEGORY
+const handleSaveCategory = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!categoryName.trim()) {
+    notify('Please enter category name.', true);
+    return;
+  }
+
+  setCategorySaving(true);
+
+  try {
+    const res = await fetch('/api/categories', {
+      method: editingCategory ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+        editingCategory
+          ? {
+              id: editingCategory.id,
+              name: categoryName.trim(),
+              description: categoryDescription,
+              image: categoryImage,
+            }
+          : {
+              name: categoryName.trim(),
+              description: categoryDescription,
+              image: categoryImage,
+              isActive: true,
+            }
+      ),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to save category');
+    }
+
+    notify(
+      editingCategory
+        ? 'Category updated successfully.'
+        : 'New category created successfully.'
+    );
+
+    setCategoryName('');
+    setCategoryDescription('');
+    setCategoryImage('');
+    setEditingCategory(null);
+
+    await loadAllData();
+
+  } catch (error: any) {
+    notify(error.message, true);
+  } finally {
+    setCategorySaving(false);
+  }
+};
+
+// EDIT CATEGORY
+const handleEditCategory = (category: Category) => {
+  setEditingCategory(category);
+  setCategoryName(category.name);
+  setCategoryDescription(category.description || '');
+  setCategoryImage(category.image || '');
+};
+
+// TOGGLE CATEGORY STATUS
+const handleToggleCategory = async (
+  id: string,
+  currentStatus: boolean
+) => {
+  try {
+    const res = await fetch('/api/categories', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        isActive: !currentStatus,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to update category');
+    }
+
+    notify(
+      !currentStatus
+        ? 'Category activated successfully.'
+        : 'Category deactivated successfully.'
+    );
+
+    await loadAllData();
+
+  } catch (error: any) {
+    notify(error.message, true);
+  }
+};
+
+// LOAD DEFAULT CATEGORIES
+const handleInitializeCategories = async () => {
+  if (
+    !confirm('Add all 14 default greeting categories?')
+  ) return;
+
+  try {
+    const res = await fetch('/api/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'seedDefaults',
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to initialize categories');
+    }
+
+    notify('Default greeting categories added successfully!');
+
+    await loadAllData();
+
+  } catch (error: any) {
+    notify(error.message, true);
+  }
+};
 
   // UPDATE ORDER STATUS & TRACKING
   const handleUpdateOrderStatus = async () => {
