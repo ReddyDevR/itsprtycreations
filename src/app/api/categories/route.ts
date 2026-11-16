@@ -35,11 +35,78 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthUser(req);
+
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin role required' },
+        { status: 403 }
+      );
     }
 
-    const { name, description, image, displayOrder, isActive } = await req.json();
+    const body = await req.json();
+
+    // INITIALIZE DEFAULT GREETING CATEGORIES
+    if (body.action === 'seedDefaults') {
+      const defaultCategories = [
+        'Birthday Greetings',
+        'Anniversary Greetings',
+        'Wedding Greetings',
+        "Valentine's Day Greetings",
+        'Christmas Greetings',
+        'New Year Greetings',
+        'Thank You Greetings',
+        'Congratulations Greetings',
+        'Friendship Greetings',
+        'Love Greetings',
+        "Mother's Day Greetings",
+        "Father's Day Greetings",
+        'Custom Greetings',
+        'All Other Greetings',
+      ];
+
+      const existingCategories = await prisma.category.findMany({
+        select: { slug: true },
+      });
+
+      const existingSlugs = new Set(
+        existingCategories.map((category) => category.slug)
+      );
+
+      const categoriesToCreate = defaultCategories
+        .map((name, index) => ({
+          name,
+          slug: slugify(name),
+          displayOrder: index + 1,
+          isActive: true,
+        }))
+        .filter((category) => !existingSlugs.has(category.slug));
+
+      if (categoriesToCreate.length > 0) {
+        await prisma.category.createMany({
+          data: categoriesToCreate,
+          skipDuplicates: true,
+        });
+      }
+
+      const categories = await prisma.category.findMany({
+        orderBy: { displayOrder: 'asc' },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Default greeting categories initialized successfully',
+        categories,
+      });
+    }
+
+    const { name, description, image, displayOrder, isActive } = body;
+
+    if (!name || !name.trim()) {
+      return NextResponse.json(
+        { error: 'Category name is required' },
+        { status: 400 }
+      );
+    }
 
     if (!name) {
       return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
