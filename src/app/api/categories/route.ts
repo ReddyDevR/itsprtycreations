@@ -184,34 +184,81 @@ export async function PUT(req: NextRequest) {
     );
   }
 }
-
 export async function DELETE(req: NextRequest) {
   try {
+    // 1. ADMIN AUTHENTICATION
     const user = await getAuthUser(req);
+
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Admin role required' },
+        { status: 403 }
+      );
     }
 
+    // 2. GET CATEGORY ID
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Category ID is required' },
+        { status: 400 }
+      );
     }
 
+    // 3. CHECK WHETHER CATEGORY EXISTS
+    const existingCategory = await prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!existingCategory) {
+      return NextResponse.json(
+        { success: false, error: 'Category not found' },
+        { status: 404 }
+      );
+    }
+
+    // 4. CHECK ASSIGNED PRODUCTS
+    const productCount = await prisma.product.count({
+      where: {
+        categoryId: id,
+      },
+    });
+
+    // 5. PREVENT DELETION IF PRODUCTS EXIST
+    if (productCount > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Cannot delete "${existingCategory.name}". ${productCount} products are assigned to this category. Please deactivate this category instead.`,
+          productCount,
+        },
+        { status: 400 }
+      );
+    }
+
+    // 6. DELETE CATEGORY
     await prisma.category.delete({
       where: { id },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Category deleted successfully',
+      message: 'Category deleted successfully.',
     });
+
   } catch (error: any) {
     console.error('Delete category error:', error);
+
     return NextResponse.json(
-      { error: error.message || 'Failed to delete category' },
+      {
+        success: false,
+        error: error.message || 'Failed to delete category',
+      },
       { status: 500 }
     );
   }
 }
+
+
