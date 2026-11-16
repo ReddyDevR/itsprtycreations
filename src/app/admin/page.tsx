@@ -747,34 +747,278 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider">Product Images (up to 500)</label>
-                  <span className="text-xs text-stone-500">{newImageUrls.length}/500 selected</span>
-                </div>
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-rose-300 bg-rose-50/50 p-5 text-xs font-bold text-rose-700 hover:bg-rose-50">
-                  <Upload className="h-4 w-4" />
-                  {uploadingImages ? 'Uploading images...' : 'Choose multiple images from device'}
-                  <input type="file" accept="image/*" multiple className="hidden" disabled={uploadingImages || newImageUrls.length >= 500} onChange={(e) => { handleProductImageFiles(e.target.files); e.currentTarget.value = ''; }} />
-                </label>
-                <div className="flex gap-2">
-                  <input type="url" placeholder="Optional: paste an image URL" value={imageUrlInput} onChange={(e) => setImageUrlInput(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-stone-200 px-3 py-2 text-xs" />
-                  <button type="button" onClick={addProductImageUrl} className="rounded-xl bg-stone-800 px-4 py-2 text-xs font-bold text-white">Add URL</button>
-                </div>
-                {newImageUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-6">
-                    {newImageUrls.map((url, index) => (
-                      <div key={`${url}-${index}`} className="relative aspect-square overflow-hidden rounded-xl border border-stone-200 bg-stone-100">
-                        <img src={url} alt={`Product preview ${index + 1}`} className="h-full w-full object-cover" />
-                        <span className="absolute left-1 top-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] text-white">{index + 1}</span>
-                        <button type="button" onClick={() => setNewImageUrls((current) => current.filter((_, i) => i !== index))} className="absolute right-1 top-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white" aria-label="Remove image">×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="text-[11px] text-stone-500">Images are uploaded to Cloudinary. The first image is used as the main product image; all images appear in the product gallery.</p>
-              </div>
+              <div className="space-y-5">
 
+  {/* IMAGE SECTION HEADER */}
+  <div className="flex flex-wrap items-center justify-between gap-3">
+
+    <div>
+      <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider">
+        Product Images *
+      </label>
+
+      <p className="text-[11px] text-stone-500 mt-1">
+        Manage your product images professionally.
+      </p>
+    </div>
+
+    <span className="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">
+      {newImageUrls.length}/{imageLimit} Images
+    </span>
+
+  </div>
+
+
+  {/* IMAGE SETTINGS */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+    {/* IMAGE COUNT DROPDOWN */}
+    <div className="space-y-1.5">
+
+      <label className="text-xs font-bold text-stone-700">
+        Maximum Image Count
+      </label>
+
+      <select
+        value={imageLimit}
+        onChange={(e) => setImageLimit(Number(e.target.value))}
+        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs font-medium outline-none focus:ring-2 focus:ring-rose-400"
+      >
+        {[1, 2, 3, 4, 5, 6].map((count) => (
+          <option
+            key={count}
+            value={count}
+            disabled={count < newImageUrls.length}
+          >
+            {count} {count === 1 ? 'Image' : 'Images'}
+          </option>
+        ))}
+      </select>
+
+    </div>
+
+
+    {/* IMAGE SOURCE DROPDOWN */}
+    <div className="space-y-1.5">
+
+      <label className="text-xs font-bold text-stone-700">
+        Select Image Source
+      </label>
+
+      <select
+        value={imageSource}
+        onChange={(e) =>
+          setImageSource(e.target.value as 'device' | 'url')
+        }
+        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs font-medium outline-none focus:ring-2 focus:ring-rose-400"
+      >
+        <option value="device">Upload From Device</option>
+        <option value="url">Add Image URLs</option>
+      </select>
+
+    </div>
+
+  </div>
+
+
+  {/* DEVICE IMAGE UPLOAD */}
+  {imageSource === 'device' && (
+
+    <div className="space-y-3">
+
+      <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/50 p-6 text-center transition-all hover:border-rose-500 hover:bg-rose-50">
+
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+          <Upload className="h-5 w-5 text-rose-600" />
+        </div>
+
+        <div>
+          <p className="text-sm font-bold text-rose-700">
+            {uploadingImages
+              ? 'Uploading Images...'
+              : 'Choose Images From Device'}
+          </p>
+
+          <p className="mt-1 text-[11px] text-stone-500">
+            Select up to {imageLimit - newImageUrls.length} more images
+          </p>
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          disabled={
+            uploadingImages ||
+            newImageUrls.length >= imageLimit
+          }
+          onChange={(e) => {
+            handleProductImageFiles(e.target.files);
+            e.currentTarget.value = '';
+          }}
+        />
+
+      </label>
+
+    </div>
+
+  )}
+
+
+  {/* IMAGE URL INPUT */}
+  {imageSource === 'url' && (
+
+    <div className="space-y-3 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+
+      <div>
+        <p className="text-xs font-bold text-stone-800">
+          Add Product Image URL
+        </p>
+
+        <p className="mt-1 text-[11px] text-stone-500">
+          Paste a publicly accessible image URL.
+        </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-2">
+
+        <input
+          type="url"
+          placeholder="https://example.com/product-image.jpg"
+          value={imageUrlInput}
+          onChange={(e) => setImageUrlInput(e.target.value)}
+          className="min-w-0 flex-1 rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs outline-none focus:ring-2 focus:ring-rose-400"
+          disabled={newImageUrls.length >= imageLimit}
+        />
+
+        <button
+          type="button"
+          onClick={addProductImageUrl}
+          disabled={
+            !imageUrlInput.trim() ||
+            newImageUrls.length >= imageLimit
+          }
+          className="rounded-xl bg-stone-900 px-5 py-3 text-xs font-bold text-white transition-all hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          + Add Image
+        </button>
+
+      </div>
+
+    </div>
+
+  )}
+
+
+  {/* IMAGE PREVIEW GALLERY */}
+  {newImageUrls.length > 0 && (
+
+    <div className="space-y-3">
+
+      <div className="flex items-center justify-between">
+
+        <h4 className="text-xs font-bold text-stone-800">
+          Selected Image Gallery
+        </h4>
+
+        <span className="text-[11px] text-stone-500">
+          {newImageUrls.length} of {imageLimit} selected
+        </span>
+
+      </div>
+
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+
+        {newImageUrls.map((url, index) => (
+
+          <div
+            key={`${url}-${index}`}
+            className="group relative aspect-square overflow-hidden rounded-xl border border-stone-200 bg-stone-100 shadow-sm"
+          >
+
+            <img
+              src={url}
+              alt={`Product preview ${index + 1}`}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+
+            {/* IMAGE NUMBER */}
+            <span className="absolute left-2 top-2 rounded-md bg-black/70 px-2 py-1 text-[10px] font-bold text-white">
+              Image {index + 1}
+            </span>
+
+
+            {/* MAIN IMAGE BADGE */}
+            {index === 0 && (
+
+              <span className="absolute bottom-2 left-2 rounded-md bg-emerald-600 px-2 py-1 text-[9px] font-bold uppercase text-white">
+                Main Image
+              </span>
+
+            )}
+
+
+            {/* REMOVE IMAGE */}
+            <button
+              type="button"
+              onClick={() =>
+                setNewImageUrls((current) =>
+                  current.filter((_, i) => i !== index)
+                )
+              }
+              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white shadow-md transition-all hover:bg-red-700"
+              aria-label={`Remove image ${index + 1}`}
+            >
+              ×
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </div>
+
+  )}
+
+
+  {/* EMPTY IMAGE STATE */}
+  {newImageUrls.length === 0 && (
+
+    <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 py-8 text-center">
+
+      <Upload className="mx-auto h-8 w-8 text-stone-300" />
+
+      <p className="mt-2 text-xs font-semibold text-stone-600">
+        No Product Images Added
+      </p>
+
+      <p className="mt-1 text-[11px] text-stone-400">
+        Select an image source and add your product images.
+      </p>
+
+    </div>
+
+  )}
+
+
+  {/* IMAGE INFORMATION */}
+  <div className="rounded-xl bg-blue-50 p-3">
+
+    <p className="text-[11px] leading-relaxed text-blue-800">
+      <strong>Image Guidelines:</strong> The first image automatically
+      becomes the main product image. All remaining images appear in
+      the customer product gallery. Images uploaded from your device
+      are stored in Cloudinary. URL images use their original image
+      addresses.
+    </p>
+
+  </div>
+
+</div>
               <div>
                 <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
                   Full Product Description *
