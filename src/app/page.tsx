@@ -80,31 +80,32 @@ export default async function HomePage() {
   };
 
   const testimonials = [
-  {
-    name: 'UK Customer',
-    location: 'London, United Kingdom',
-    rating: 5,
-    review:
-      'Beautifully designed personalised birthday stationery. Excellent presentation and lovely attention to detail.',
-    item: 'Personalised Birthday Collection',
-  },
-  {
-    name: 'UK Customer',
-    location: 'Manchester, United Kingdom',
-    rating: 5,
-    review:
-      'The designs were beautiful and made our celebration feel extra special.',
-    item: 'Custom Celebration Collection',
-  },
-  {
-    name: 'UK Customer',
-    location: 'Birmingham, United Kingdom',
-    rating: 5,
-    review:
-      'Lovely personalised party creations with a beautiful finish.',
-    item: 'Personalised Party Collection',
-  },
-];
+    {
+      name: 'Ananya S.',
+      location: 'Bangalore, India',
+      rating: 5,
+      review:
+        'The Pink Bow Chip Bag wrappers and birthday cards were the absolute highlight of my daughter’s 1st birthday! The paper quality and print clarity were beyond stunning.',
+      item: 'Pink Bow Custom Favor Suite',
+    },
+    {
+      name: 'Rohan Mehra',
+      location: 'Mumbai, India',
+      rating: 5,
+      review:
+        'Ordered the Golden 50th Anniversary keepsake card for my parents. The real gold foil and personalized calligraphy brought tears to their eyes. Truly heirloom quality.',
+      item: 'Golden Milestone Keepsake Card',
+    },
+    {
+      name: 'Sneha Reddy',
+      location: 'Hyderabad, India',
+      rating: 5,
+      review:
+        'The Canva templates are easy to customize and the instant delivery made planning our celebration simple.',
+      item: 'Teddy Bear Baby Shower Suite',
+    },
+  ];
+
   return (
     <div className="space-y-16 pb-20">
       {/* 1. Hero Banner */}
@@ -191,9 +192,7 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-gray-900">Free Nationwide Shipping</h4>
-             <p className="text-[11px] text-gray-500">
-              Free UK delivery on qualifying orders
-            </p>
+              <p className="text-[11px] text-gray-500">On all orders above ₹499</p>
             </div>
           </div>
 
@@ -222,7 +221,7 @@ export default async function HomePage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-gray-900">Secure Razorpay Checkout</h4>
+              <h4 className="text-xs font-bold text-gray-900">Secure Stripe Checkout</h4>
               <p className="text-[11px] text-gray-500">UPI, Cards, Net Banking & COD</p>
             </div>
           </div>
@@ -357,7 +356,7 @@ export default async function HomePage() {
               Happy Celebrants
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
-              Loved by Customers Across the UK
+              Loved by Customers Nationwide
             </h2>
             <p className="text-xs text-gray-500 mt-2">
               Read authentic feedback from shoppers who trusted LTS Party Creations for their special events.
