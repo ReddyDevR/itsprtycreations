@@ -87,10 +87,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div>
           {product.category && (
             <Link
-              href={`/products?category=${product.category.slug}`}
+              href="/products"
               className="text-[10px] uppercase font-bold tracking-wider text-rose-600/80 hover:text-rose-700 transition-colors"
             >
-              {product.category.name}
+              All Items
             </Link>
           )}
 
