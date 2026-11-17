@@ -111,14 +111,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* Pricing & Add to Cart button */}
-        <div className="pt-3 mt-2 border-t border-gray-100 flex items-center justify-between">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-bold text-gray-900">₹{product.sellingPrice}</span>
-            {product.originalPrice > product.sellingPrice && (
-              <span className="text-xs text-gray-400 line-through">₹{product.originalPrice}</span>
-            )}
-          </div>
+        {/* Fixed Selling Price & Add to Cart */}
+<div className="pt-3 mt-2 border-t border-gray-100 flex items-center justify-between">
+
+  <div className="flex flex-col">
+    <span className="text-lg font-extrabold text-gray-900">
+      ₹{product.sellingPrice}
+    </span>
+
+    <span className="text-[10px] text-emerald-600 font-medium">
+      Fixed Price
+    </span>
+  </div>
 
           <button
             onClick={() => addToCart(product, 1, product.variations?.[0] || null)}
