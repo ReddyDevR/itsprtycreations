@@ -38,42 +38,11 @@ export const Footer: React.FC = () => {
 
           </div>
 
-          {/* Quick Categories */}
+          {/* All Items */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-              Greeting Categories
-            </h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Shop</h4>
             <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/products?category=birthday-greetings" className="hover:text-rose-400 transition-colors">
-                  Birthday Greetings
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=anniversary-greetings" className="hover:text-rose-400 transition-colors">
-                  Anniversary Greetings
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=wedding-greetings" className="hover:text-rose-400 transition-colors">
-                  Wedding Stationery
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=valentines-day-greetings" className="hover:text-rose-400 transition-colors">
-                  Valentine&apos;s Day
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=congratulations-greetings" className="hover:text-rose-400 transition-colors">
-                  Congratulations
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=custom-greetings" className="hover:text-rose-400 transition-colors font-bold text-amber-400">
-                  Custom Bespoke Cards
-                </Link>
-              </li>
+              <li><Link href="/products" className="hover:text-rose-400 transition-colors">All Items</Link></li>
             </ul>
           </div>
 
