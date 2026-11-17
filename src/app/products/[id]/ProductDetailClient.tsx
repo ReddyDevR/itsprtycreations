@@ -30,9 +30,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const router = useRouter();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
 
-  const [selectedImage, setSelectedImage] = useState(
-    product.images?.[0]?.url || 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80'
-  );
+  const [selectedMedia, setSelectedMedia] = useState(
+  product.images?.[0] || {
+    url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80',
+    mediaType: 'IMAGE' as const,
+  }
+);
 
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(
     product.variations?.[0] || null
@@ -84,47 +87,79 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column: Image Gallery */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-rose-50/50 border border-rose-100 shadow-lg">
-            <img
-              src={selectedImage}
-              alt={product.title}
-              className="w-full h-full object-cover transition-all duration-300"
-            />
-            {discountPercent > 0 && (
-              <span className="absolute top-4 left-4 px-3 py-1 text-xs font-bold uppercase tracking-wider bg-rose-600 text-white rounded-lg shadow-md">
-                {discountPercent}% OFF
-              </span>
-            )}
-            <button
-              onClick={() => toggleWishlist(product.id)}
-              className={`absolute top-4 right-4 p-3 rounded-full transition-all shadow-md ${
-                isFavorited
-                  ? 'bg-rose-50 text-rose-600'
-                  : 'bg-white/90 text-gray-600 hover:text-rose-600'
-              }`}
-            >
-              <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current text-rose-600' : ''}`} />
-            </button>
-          </div>
+         <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-rose-50/50 border border-rose-100 shadow-lg">
 
-          {/* Thumbnail list */}
-          {product.images && product.images.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {product.images.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(img.url)}
-                  className={`w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
-                    selectedImage === img.url
-                      ? 'border-rose-600 shadow-md scale-95'
-                      : 'border-transparent opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img src={img.url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
+  {selectedMedia.mediaType === 'VIDEO' ? (
+    <video
+      key={selectedMedia.url}
+      src={selectedMedia.url}
+      controls
+      playsInline
+      preload="metadata"
+      className="w-full h-full object-contain bg-black"
+    />
+  ) : (
+    <img
+      src={selectedMedia.url}
+      alt={product.title}
+      className="w-full h-full object-cover transition-all duration-300"
+    />
+  )}
+
+  <button
+    onClick={() => toggleWishlist(product.id)}
+    className={`absolute top-4 right-4 p-3 rounded-full transition-all shadow-md ${
+      isFavorited
+        ? 'bg-rose-50 text-rose-600'
+        : 'bg-white/90 text-gray-600 hover:text-rose-600'
+    }`}
+  >
+    <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current text-rose-600' : ''}`} />
+  </button>
+
+</div>
+         {/* Product Image and Video Gallery */}
+{product.images && product.images.length > 1 && (
+  <div className="flex gap-3 overflow-x-auto pb-2">
+
+    {product.images.map((media, idx) => (
+      <button
+        key={media.id || idx}
+        onClick={() => setSelectedMedia(media)}
+        className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
+          selectedMedia.url === media.url
+            ? 'border-rose-600 shadow-md scale-95'
+            : 'border-transparent opacity-70 hover:opacity-100'
+        }`}
+      >
+
+        {media.mediaType === 'VIDEO' ? (
+          <video
+            src={media.url}
+            muted
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={media.url}
+            alt={`Product media ${idx + 1}`}
+            className="w-full h-full object-cover"
+          />
+        )}
+
+        {media.mediaType === 'VIDEO' && (
+          <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white text-xs">
+            ▶
+          </span>
+        )}
+
+      </button>
+    ))}
+
+  </div>
+)}
         </div>
 
         {/* Right Column: Product Purchasing Info */}
