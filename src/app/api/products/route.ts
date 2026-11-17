@@ -130,25 +130,55 @@ export async function POST(req: NextRequest) {
   );
 }
 
-    if (!Array.isArray(images) || images.length < 1 || images.length > 6) {
-      return NextResponse.json({ error: 'Add between 1 and 6 product image URLs.' }, { status: 400 });
-    }
-    if (images.some((img: any) => !(typeof img === 'string' ? img : img?.url))) {
-      return NextResponse.json({ error: 'Every product image must have a valid URL.' }, { status: 400 });
-    }
-    const imageUrls = images.map((img: any) => typeof img === 'string' ? img : img.url);
-    const hasInvalidImageUrl = imageUrls.some((value: string) => {
-      try {
-        const parsed = new URL(value);
-        return !['http:', 'https:'].includes(parsed.protocol);
-      } catch {
-        return true;
-      }
-    });
-    if (hasInvalidImageUrl) {
-      return NextResponse.json({ error: 'Every image must use a valid HTTP or HTTPS URL.' }, { status: 400 });
+    // Validate product media URLs (maximum 6)
+if (
+  !Array.isArray(images) ||
+  images.length < 1 ||
+  images.length > 6
+) {
+  return NextResponse.json(
+    { error: 'Add between 1 and 6 product media URLs.' },
+    { status: 400 }
+  );
+}
+
+const mediaItems = [];
+
+for (const img of images) {
+  const url = (
+    typeof img === 'string' ? img : img?.url
+  )?.trim();
+
+  if (!url) {
+    return NextResponse.json(
+      { error: 'Every media item must have a URL.' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('Invalid protocol');
     }
 
+    const isVideo = parsed.pathname
+      .toLowerCase()
+      .endsWith('.mp4');
+
+    mediaItems.push({
+      url,
+      mediaType: isVideo ? 'VIDEO' : 'IMAGE',
+    });
+
+  } catch {
+    return NextResponse.json(
+      { error: `Invalid media URL: ${url}` },
+      { status: 400 }
+    );
+  }
+}
     const allItemsCategory = await ensureAllItemsCategory();
 
     const origPrice = Number(originalPrice) || Number(sellingPrice);
