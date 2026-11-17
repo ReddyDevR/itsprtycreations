@@ -210,13 +210,14 @@ for (const img of images) {
         isNewArrival: isNewArrival !== undefined ? Boolean(isNewArrival) : true,
         isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
         images: {
-          create: (images || []).map((img: any, idx: number) => ({
-            url: typeof img === 'string' ? img : img.url,
-            alt: typeof img === 'string' ? `${title} photo` : (img.alt || `${title} photo`),
-            isPrimary: idx === 0,
-            displayOrder: idx,
-          })),
-        },
+        create: mediaItems.map((item, idx) => ({
+        url: item.url,
+        mediaType: item.mediaType,
+       alt: `${title} media ${idx + 1}`,
+       isPrimary: idx === 0,
+       displayOrder: idx,
+       })),
+       },
         variations: {
           create: (variations || []).map((v: any) => ({
             name: v.name || 'Option',
