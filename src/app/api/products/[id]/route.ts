@@ -82,9 +82,9 @@ export async function PUT(
     const discountPercent =
       origPrice > sellPrice ? Math.round(((origPrice - sellPrice) / origPrice) * 100) : 0;
 
-    // Update images if provided (maximum 500 per product).
+    // Update images if provided (maximum 6 per product).
     if (Array.isArray(body.images)) {
-      if (body.images.length > 500) return NextResponse.json({ error: 'A product can contain a maximum of 500 images.' }, { status: 400 });
+      if (body.images.length > 6) return NextResponse.json({ error: 'A product can contain a maximum of 6 images.' }, { status: 400 });
       if (body.images.some((img: any) => !(typeof img === 'string' ? img : img?.url))) return NextResponse.json({ error: 'Every product image must have a valid URL.' }, { status: 400 });
       await prisma.productImage.deleteMany({ where: { productId: id } });
       await prisma.productImage.createMany({
