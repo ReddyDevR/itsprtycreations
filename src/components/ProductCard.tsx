@@ -13,22 +13,42 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
 
-  const isFavorited = isInWishlist(product.id);
+    const isFavorited = isInWishlist(product.id);
+
+  const primaryMedia = product.images?.[0];
+
   const primaryImage =
-    product.images?.[0]?.url ||
+    primaryMedia?.url ||
     'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80';
-  const secondaryImage = product.images?.[1]?.url || primaryImage;
+
+  const isPrimaryVideo = primaryMedia?.mediaType === 'VIDEO';
 
   return (
     <div className="group relative bg-white rounded-2xl border border-rose-100/70 overflow-hidden shadow-xs hover:shadow-xl hover:border-rose-200 transition-all duration-300 flex flex-col">
       {/* Product Image Frame */}
       <div className="relative aspect-square w-full overflow-hidden bg-rose-50/30">
-        <Link href={`/products/${product.slug || product.id}`}>
-          <img
-            src={primaryImage}
-            alt={product.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+                <Link
+          href={`/products/${product.slug || product.id}`}
+          className="block w-full h-full"
+        >
+          {isPrimaryVideo ? (
+            <video
+              src={primaryImage}
+              muted
+              autoPlay
+              loop
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <img
+              src={primaryImage}
+              alt={product.title}
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          )}
         </Link>
 
         {/* Badges */}
