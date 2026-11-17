@@ -27,6 +27,8 @@ import {
   DollarSign,
   Truck,
   Save,
+  PlusCircle,
+  X,
 } from 'lucide-react';
 import { Product, Order, User } from '@/types';
 
@@ -206,6 +208,11 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
+    const mediaItems = editingProduct.images || [];
+    if (mediaItems.length < 1 || mediaItems.length > 6 || mediaItems.some((media) => !media.url.trim())) {
+      notify('Please provide 1 to 6 valid image/video URLs. Remove empty URL fields before saving.', true);
+      return;
+    }
 
     try {
       const res = await fetch(`/api/products/${editingProduct.id}`, {
@@ -214,6 +221,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
         body: JSON.stringify({
   title: editingProduct.title,
   description: editingProduct.description,
+  images: editingProduct.images.map((media) => ({ url: media.url })),
 
   originalPrice: editingProduct.sellingPrice,
   sellingPrice: editingProduct.sellingPrice,
@@ -1185,7 +1193,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
       {/* EDIT PRODUCT MODAL */}
       {editingProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-rose-100 shadow-2xl">
+          <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-rose-100 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <h3 className="font-serif font-bold text-lg text-stone-900">Edit Product Details</h3>
               <button
@@ -1259,6 +1267,67 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                 />
               </div>
 
+              {/* EDIT PRODUCT MEDIA: IMAGE / VIDEO URLS + LIVE PREVIEW */}
+              <div className="space-y-3 rounded-2xl border border-rose-100 bg-rose-50/40 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-stone-800">Product Images & Videos</h4>
+                    <p className="text-[10px] text-stone-500">Edit existing URLs, add or remove media. Maximum 6 files.</p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={(editingProduct.images?.length || 0) >= 6}
+                    onClick={() => setEditingProduct({
+                      ...editingProduct,
+                      images: [...(editingProduct.images || []), { url: '', mediaType: 'IMAGE', isPrimary: false, displayOrder: editingProduct.images?.length || 0 }],
+                    })}
+                    className="inline-flex items-center gap-1 rounded-lg bg-stone-900 px-3 py-2 text-[10px] font-bold text-white disabled:opacity-40"
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" /> Add URL
+                  </button>
+                </div>
+
+                {(editingProduct.images || []).map((media, index) => {
+                  const isVideo = /\.mp4(\?.*)?$/i.test(media.url || '') || media.mediaType === 'VIDEO';
+                  return (
+                    <div key={media.id || `media-${index}`} className="space-y-2 rounded-xl border border-stone-200 bg-white p-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-16 shrink-0 text-[10px] font-bold text-stone-500">{isVideo ? 'VIDEO' : 'IMAGE'} {index + 1}</span>
+                        <input
+                          type="url"
+                          value={media.url || ''}
+                          onChange={(e) => {
+                            const nextImages = [...(editingProduct.images || [])];
+                            const url = e.target.value;
+                            nextImages[index] = { ...nextImages[index], url, mediaType: /\.mp4(\?.*)?$/i.test(url) ? 'VIDEO' : 'IMAGE', displayOrder: index, isPrimary: index === 0 };
+                            setEditingProduct({ ...editingProduct, images: nextImages });
+                          }}
+                          placeholder="https://example.com/image.jpg or video.mp4"
+                          className="min-w-0 flex-1 rounded-lg border border-stone-200 px-3 py-2 text-xs outline-none focus:border-rose-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setEditingProduct({ ...editingProduct, images: (editingProduct.images || []).filter((_, i) => i !== index).map((item, i) => ({ ...item, displayOrder: i, isPrimary: i === 0 })) })}
+                          className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                          title="Remove media"
+                        ><X className="h-4 w-4" /></button>
+                      </div>
+                      {media.url?.trim() && (
+                        <div className="overflow-hidden rounded-lg border border-stone-100 bg-stone-100 p-2">
+                          <p className="mb-1 text-[9px] font-bold uppercase tracking-wide text-stone-500">Live Preview</p>
+                          {isVideo ? (
+                            <video key={media.url} src={media.url} controls playsInline className="mx-auto max-h-48 w-full rounded-md bg-black" />
+                          ) : (
+                            <img key={media.url} src={media.url} alt={`Product media preview ${index + 1}`} className="mx-auto max-h-48 max-w-full rounded-md object-contain" onError={(e) => { e.currentTarget.alt = 'Preview unavailable — check the image URL'; }} />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {(editingProduct.images || []).length === 0 && <p className="rounded-lg bg-white p-3 text-center text-xs text-stone-500">No media added. Click Add URL to add an image or video.</p>}
+              </div>
+
               <div className="flex gap-4 pt-2">
                 <label className="flex items-center gap-2 text-xs cursor-pointer">
                   <input
@@ -1305,7 +1374,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
       {/* ORDER MANAGEMENT MODAL */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-rose-100 shadow-2xl">
+          <div className="bg-white max-w-2xl w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto border border-rose-100 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
