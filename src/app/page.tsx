@@ -192,7 +192,9 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-gray-900">Free Nationwide Shipping</h4>
-              <p className="text-[11px] text-gray-500">On all orders above ₹499</p>
+             <p className="text-[11px] text-gray-500">
+              Free UK delivery on qualifying orders
+            </p>
             </div>
           </div>
 
