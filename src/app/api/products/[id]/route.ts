@@ -77,10 +77,20 @@ export async function PUT(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const origPrice = body.originalPrice !== undefined ? Number(body.originalPrice) : existing.originalPrice;
-    const sellPrice = body.sellingPrice !== undefined ? Number(body.sellingPrice) : existing.sellingPrice;
-    const discountPercent =
-      origPrice > sellPrice ? Math.round(((origPrice - sellPrice) / origPrice) * 100) : 0;
+    const sellPrice =
+  body.sellingPrice !== undefined
+    ? Number(body.sellingPrice)
+    : existing.sellingPrice;
+
+if (!Number.isFinite(sellPrice) || sellPrice <= 0) {
+  return NextResponse.json(
+    { error: 'Enter a valid selling price.' },
+    { status: 400 }
+  );
+}
+
+const origPrice = sellPrice;
+const discountPercent = 0;
 
     // Update product images and videos
 if (Array.isArray(body.images)) {
