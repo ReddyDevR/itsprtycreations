@@ -212,15 +212,17 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: editingProduct.title,
-          description: editingProduct.description,
-          originalPrice: editingProduct.originalPrice,
-          sellingPrice: editingProduct.sellingPrice,
-          stock: editingProduct.stock,
-            isPublished: editingProduct.isPublished,
-          isFeatured: editingProduct.isFeatured,
-          isBestSeller: editingProduct.isBestSeller,
-        }),
+  title: editingProduct.title,
+  description: editingProduct.description,
+
+  originalPrice: editingProduct.sellingPrice,
+  sellingPrice: editingProduct.sellingPrice,
+
+  stock: editingProduct.stock,
+  isPublished: editingProduct.isPublished,
+  isFeatured: editingProduct.isFeatured,
+  isBestSeller: editingProduct.isBestSeller,
+}),
       });
 
       const data = await res.json();
@@ -1206,42 +1208,33 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-stone-700 mb-1">
-                    Selling Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={editingProduct.sellingPrice}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        sellingPrice: Number(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 text-xs border border-stone-200 rounded-xl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-stone-700 mb-1">
-                    Original Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={editingProduct.originalPrice}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        originalPrice: Number(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 text-xs border border-stone-200 rounded-xl"
-                  />
-                </div>
-              </div>
+              <div className="grid grid-cols-1 gap-3">
+  <div>
+    <label className="block text-xs font-bold text-stone-700 mb-1">
+      Fixed Selling Price (₹) *
+    </label>
 
+    <input
+      type="number"
+      required
+      min={1}
+      step="0.01"
+      value={editingProduct.sellingPrice}
+      onChange={(e) =>
+        setEditingProduct({
+          ...editingProduct,
+          sellingPrice: Number(e.target.value),
+          originalPrice: Number(e.target.value),
+        })
+      }
+      className="w-full px-3 py-3 text-sm font-bold border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
+    />
+
+    <p className="text-[10px] text-stone-500 mt-1">
+      This is the final fixed price customers will pay.
+    </p>
+  </div>
+</div>
               <div>
                 <label className="block text-xs font-medium text-stone-700 mb-1">Stock Quantity</label>
                 <input
