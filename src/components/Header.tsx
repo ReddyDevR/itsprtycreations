@@ -27,16 +27,22 @@ export const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!searchQuery.trim()) return;
-    router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+
+    router.push(
+      `/products?search=${encodeURIComponent(searchQuery.trim())}`
+    );
   };
 
-  const totalCartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCartCount = items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
   return (
     <>
@@ -174,17 +180,8 @@ export const Header: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-  <button
-    onClick={() => {
-      setAuthModalOpen(true);
-    }}
-    className="px-4 py-2.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-2"
-  >
-    <User className="w-4 h-4" />
-    Sign In
-  </button>
-</div>
+                \<div className="flex items-center gap-2">   \<button     onClick={() => setAuthModalOpen(true)}     className="px-4 py-2.5 text-xs font-semibold text-rose-700 bg-rose-50 hover\:bg-rose-100 rounded-xl transition-all flex items-center gap-2"   >     \<User className="w-4 h-4" />     Sign In   \</button> \</div>
+
             </div>
           </div>
 
@@ -234,11 +231,10 @@ export const Header: React.FC = () => {
         )}
       </header>
 
-      {/* Customer Authentication Modal */}
+     {/* Customer Authentication Modal */}
 <AuthModal
   isOpen={authModalOpen}
   onClose={() => setAuthModalOpen(false)}
 />
-    </>
   );
 };
