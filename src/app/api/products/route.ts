@@ -2,10 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 import { getAuthUser } from '../../../lib/auth';
 import { slugify } from '../../../lib/slug';
+
+async function ensureAllItemsCategory() {
+  const category = await prisma.category.upsert({
+    where: { slug: 'all-items' },
+    update: { name: 'All Items', isActive: true },
+    create: {
+      name: 'All Items',
+      slug: 'all-items',
+      description: 'All products',
+      isActive: true,
+      displayOrder: 0,
+    },
+  });
+
+  // Preserve all products and images while assigning every product to All Items.
+  await prisma.product.updateMany({
+    where: { categoryId: { not: category.id } },
+    data: { categoryId: category.id },
+  });
+
+  return category;
+}
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
     const search = searchParams.get('search');
     const sort = searchParams.get('sort') || 'newest';
     const featured = searchParams.get('featured');
@@ -22,16 +43,12 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    await ensureAllItemsCategory();
+
     const where: any = {};
 
     if (!canViewUnpublished) {
       where.isPublished = true;
-    }
-
-    if (category) {
-      where.category = {
-        slug: category,
-      };
     }
 
     if (search) {
@@ -92,7 +109,6 @@ export async function POST(req: NextRequest) {
       originalPrice,
       sellingPrice,
       stock,
-      categoryId,
       details,
       specifications,
       isFeatured,
@@ -105,43 +121,35 @@ export async function POST(req: NextRequest) {
 
     if (
   !title?.trim() ||
-  !categoryId ||
   sellingPrice === undefined ||
   Number(sellingPrice) <= 0
 ) {
   return NextResponse.json(
-    { error: 'Valid product title, category, and selling price are required' },
+    { error: 'Valid product title and selling price are required' },
     { status: 400 }
   );
 }
 
-// Verify selected greeting category
-const selectedCategory = await prisma.category.findUnique({
-  where: {
-    id: categoryId,
-  },
-});
-
-if (!selectedCategory) {
-  return NextResponse.json(
-    { error: 'Selected greeting category does not exist.' },
-    { status: 400 }
-  );
-}
-
-if (!selectedCategory.isActive) {
-  return NextResponse.json(
-    { error: 'This greeting category is inactive. Please select an active category.' },
-    { status: 400 }
-  );
-}
-
-    if (!Array.isArray(images) || images.length < 1 || images.length > 500) {
-      return NextResponse.json({ error: 'Add between 1 and 500 product images.' }, { status: 400 });
+    if (!Array.isArray(images) || images.length < 1 || images.length > 6) {
+      return NextResponse.json({ error: 'Add between 1 and 6 product image URLs.' }, { status: 400 });
     }
     if (images.some((img: any) => !(typeof img === 'string' ? img : img?.url))) {
       return NextResponse.json({ error: 'Every product image must have a valid URL.' }, { status: 400 });
     }
+    const imageUrls = images.map((img: any) => typeof img === 'string' ? img : img.url);
+    const hasInvalidImageUrl = imageUrls.some((value: string) => {
+      try {
+        const parsed = new URL(value);
+        return !['http:', 'https:'].includes(parsed.protocol);
+      } catch {
+        return true;
+      }
+    });
+    if (hasInvalidImageUrl) {
+      return NextResponse.json({ error: 'Every image must use a valid HTTP or HTTPS URL.' }, { status: 400 });
+    }
+
+    const allItemsCategory = await ensureAllItemsCategory();
 
     const origPrice = Number(originalPrice) || Number(sellingPrice);
     const sellPrice = Number(sellingPrice);
@@ -164,7 +172,7 @@ if (!selectedCategory.isActive) {
         sellingPrice: sellPrice,
         discountPercent,
         stock: Number(stock) || 100,
-        categoryId,
+        categoryId: allItemsCategory.id,
         details: details || '',
         specifications: specifications ? (typeof specifications === 'string' ? specifications : JSON.stringify(specifications)) : null,
         isFeatured: Boolean(isFeatured),
@@ -197,7 +205,7 @@ if (!selectedCategory.isActive) {
 
     return NextResponse.json({
       success: true,
-      message: 'Greeting card created successfully',
+      message: 'Product created successfully under All Items',
       product,
     });
   } catch (error: any) {
