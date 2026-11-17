@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
@@ -42,7 +42,7 @@ export default function CheckoutPage() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [postalCode, setPostalCode] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'RAZORPAY' | 'COD'>('RAZORPAY');
+  const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'COD'>('STRIPE');
 
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -50,6 +50,37 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmedOrder, setConfirmedOrder] = useState<any>(null);
+  const paymentReturnHandled = useRef(false);
+
+  useEffect(() => {
+    if (paymentReturnHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    const sessionId = params.get('session_id');
+
+    if (payment === 'cancelled') {
+      paymentReturnHandled.current = true;
+      setError('Payment was cancelled. Your order has not been paid. You can try again.');
+      window.history.replaceState({}, '', '/checkout');
+      return;
+    }
+
+    if (payment === 'success' && sessionId) {
+      paymentReturnHandled.current = true;
+      setLoading(true);
+      fetch(`/api/payment/verify?session_id=${encodeURIComponent(sessionId)}`)
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok || !data.success) throw new Error(data.error || 'Unable to verify payment.');
+          clearCart();
+          setConfirmedOrder(data.order);
+          confetti({ particleCount: 140, spread: 75, origin: { y: 0.6 } });
+          window.history.replaceState({}, '', '/checkout');
+        })
+        .catch((err) => setError(err.message || 'Payment verification failed.'))
+        .finally(() => setLoading(false));
+    }
+  }, []);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,90 +149,25 @@ export default function CheckoutPage() {
 
       const createdOrder = orderData.order;
 
-      // If Payment Method is COD
       if (paymentMethod === 'COD') {
         clearCart();
         setConfirmedOrder(createdOrder);
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        setLoading(false);
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
         return;
       }
 
-      // If Payment Method is RAZORPAY
-      if (paymentMethod === 'RAZORPAY') {
-        const razorpayKey =
-          process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
-
-        // Check if Razorpay SDK loaded in window
-        if (typeof window !== 'undefined' && (window as any).Razorpay) {
-          const options = {
-            key: razorpayKey,
-            amount: Math.round(createdOrder.totalAmount * 100),
-            currency: 'INR',
-            name: 'ITSPRTYCREATIONS',
-            description: `Order ${createdOrder.orderNumber} - LTS Party Creations`,
-            order_id: orderData.razorpayOrder?.id,
-            prefill: {
-              name: fullName,
-              email: email,
-              contact: phone,
-            },
-            theme: {
-              color: '#be123c', // Brand Rose
-            },
-            handler: async function (response: any) {
-              try {
-                // Cryptographic server-side verification
-                const verifyRes = await fetch('/api/payment/verify', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    orderId: createdOrder.id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature: response.razorpay_signature,
-                  }),
-                });
-
-                const verifyData = await verifyRes.json();
-                if (verifyData.success) {
-                  clearCart();
-                  setConfirmedOrder(verifyData.order || createdOrder);
-                  confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-                } else {
-                  setError('Payment signature verification failed.');
-                }
-              } catch (err: any) {
-                setError('Payment verification error: ' + err.message);
-              }
-            },
-            modal: {
-              ondismiss: function () {
-                setLoading(false);
-              },
-            },
-          };
-
-          const rzp = new (window as any).Razorpay(options);
-          rzp.open();
-        } else {
-          // Direct fallback simulation verification for sandbox test environments
-          const verifyRes = await fetch('/api/payment/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              orderId: createdOrder.id,
-              razorpay_order_id: orderData.razorpayOrder?.id || `rzp_ord_${Date.now()}`,
-              razorpay_payment_id: `pay_${Date.now().toString(36)}`,
-              razorpay_signature: 'simulated_valid_signature',
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          clearCart();
-          setConfirmedOrder(verifyData.order || createdOrder);
-          confetti({ particleCount: 120, spread: 75, origin: { y: 0.6 } });
-        }
+      // Create a Stripe-hosted GBP Checkout Session and redirect the customer.
+      const stripeRes = await fetch('/api/payment/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: createdOrder.id }),
+      });
+      const stripeData = await stripeRes.json();
+      if (!stripeRes.ok || !stripeData.success || !stripeData.url) {
+        throw new Error(stripeData.error || 'Unable to start secure Stripe checkout.');
       }
+      window.location.assign(stripeData.url);
+
     } catch (err: any) {
       setError(err.message || 'Error occurred while processing checkout');
     } finally {
@@ -218,7 +184,7 @@ export default function CheckoutPage() {
         </div>
 
         <span className="text-xs uppercase font-bold tracking-widest text-emerald-600 bg-emerald-50 px-3.5 py-1 rounded-full">
-          Order Successfully Placed & Verified
+          {confirmedOrder.paymentMethod === 'COD' ? 'Cash on Delivery Order Placed' : 'Order Successfully Placed & Verified'}
         </span>
 
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-gray-900">
@@ -226,7 +192,11 @@ export default function CheckoutPage() {
         </h1>
 
         <p className="text-sm text-gray-600 max-w-lg mx-auto">
-          Your order has been received and confirmed by the LTS Party Creations studio. We have dispatched a confirmation email to <b>{confirmedOrder.customerEmail}</b>.
+          {confirmedOrder.paymentMethod === 'COD' ? (
+            <>Your order has been placed. Please pay the delivery partner in cash when your order arrives. An order confirmation will be sent to <b>{confirmedOrder.customerEmail}</b>.</>
+          ) : (
+            <>Your order has been received and confirmed by the LTS Party Creations studio. We have dispatched a confirmation email to <b>{confirmedOrder.customerEmail}</b>.</>
+          )}
         </p>
 
         <div className="bg-white p-6 rounded-3xl border border-rose-100 shadow-sm max-w-md mx-auto text-left space-y-3">
@@ -236,12 +206,12 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between text-xs pb-3 border-b border-gray-100">
             <span className="text-gray-500">Total Amount</span>
-            <span className="font-bold text-gray-900">₹{confirmedOrder.totalAmount}</span>
+            <span className="font-bold text-gray-900">£{Number(confirmedOrder.totalAmount).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-xs pb-3 border-b border-gray-100">
             <span className="text-gray-500">Payment Status</span>
             <span className="font-bold text-emerald-600 uppercase">
-              {confirmedOrder.paymentStatus || 'PAID'}
+              {confirmedOrder.paymentStatus || (confirmedOrder.paymentMethod === 'COD' ? 'PENDING' : 'PAID')}
             </span>
           </div>
           <div className="flex justify-between text-xs">
@@ -394,82 +364,59 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-  UK Postcode *
-</label>
-
-<input
-  type="text"
-  required
-  maxLength={10}
-  placeholder="SW1A 1AA"
-  value={postalCode}
-  onChange={(e) => setPostalCode(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                <label className="block text-xs font-medium text-gray-700 mb-1">Postal Pincode *</label>
+                <input
+                  type="text"
+                  required
+                  maxLength={10}
+                  placeholder="SW1A 1AA"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* 2. Payment Method Selector */}
+          {/* 2. Secure UK Payment */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-xs space-y-4">
             <h2 className="text-base font-bold text-gray-900 pb-2 border-b border-gray-100 flex items-center gap-2">
               <Lock className="w-5 h-5 text-rose-600" />
-              2. Select Payment Method
+              2. Secure Payment
             </h2>
-
             <div className="space-y-3">
-              {/* Razorpay Option */}
-              <label
-                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
-                  paymentMethod === 'RAZORPAY'
-                    ? 'border-rose-600 bg-rose-50/50 shadow-xs ring-1 ring-rose-500'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
+              <label className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-colors ${paymentMethod === 'STRIPE' ? 'border-rose-400 bg-rose-50/60' : 'border-gray-200 bg-white'}`}>
                 <input
                   type="radio"
                   name="paymentMethod"
-                  checked={paymentMethod === 'RAZORPAY'}
-                  onChange={() => setPaymentMethod('RAZORPAY')}
-                  className="mt-1 text-rose-600 focus:ring-rose-500"
+                  value="STRIPE"
+                  checked={paymentMethod === 'STRIPE'}
+                  onChange={() => setPaymentMethod('STRIPE')}
+                  className="mt-1 accent-rose-600"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-900">
-                      Razorpay Secure Payment (Recommended)
-                    </span>
-                    <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                      Instant & 100% Safe
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    Pay securely using Google Pay, PhonePe, Paytm, UPI ID, All Bank Debit / Credit Cards & Net Banking.
-                  </p>
-                </div>
+                <span className="flex-1">
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-bold text-gray-900">Pay Online with Stripe</span>
+                    <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded">Secure</span>
+                  </span>
+                  <span className="block text-xs text-gray-600 mt-2">Pay in GBP using supported cards. Apple Pay and Google Pay may appear when eligible.</span>
+                  <span className="block text-[11px] text-gray-500 mt-1">Payments are securely processed by Stripe.</span>
+                </span>
               </label>
 
-              {/* Cash On Delivery Option */}
-              <label
-                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
-                  paymentMethod === 'COD'
-                    ? 'border-rose-600 bg-rose-50/50 shadow-xs ring-1 ring-rose-500'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
+              <label className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-colors ${paymentMethod === 'COD' ? 'border-rose-400 bg-rose-50/60' : 'border-gray-200 bg-white'}`}>
                 <input
                   type="radio"
                   name="paymentMethod"
+                  value="COD"
                   checked={paymentMethod === 'COD'}
                   onChange={() => setPaymentMethod('COD')}
-                  className="mt-1 text-rose-600 focus:ring-rose-500"
+                  className="mt-1 accent-rose-600"
                 />
-                <div className="flex-1">
-                  <span className="text-xs font-bold text-gray-900">Cash on Delivery (COD)</span>
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    Pay in cash upon physical delivery at your doorstep.
-                  </p>
-                </div>
+                <span className="flex-1">
+                  <span className="block text-sm font-bold text-gray-900">Cash on Delivery (COD)</span>
+                  <span className="block text-xs text-gray-600 mt-1">Pay cash to the delivery partner when your order is delivered. Available only where the delivery service supports cash collection.</span>
+                </span>
               </label>
             </div>
           </div>
@@ -499,7 +446,7 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex justify-between items-center mt-1 text-gray-600">
                       <span>Qty: {i.quantity}</span>
-                      <span className="font-bold text-gray-900">₹{i.price * i.quantity}</span>
+                      <span className="font-bold text-gray-900">£{Number(i.price * i.quantity).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -532,7 +479,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Coupon <b>{appliedCoupon}</b> applied (-₹{discount})</span>
+                    <span>Coupon <b>{appliedCoupon}</b> applied (-£{Number(discount).toFixed(2)})</span>
                   </div>
                   <button
                     type="button"
@@ -553,21 +500,21 @@ export default function CheckoutPage() {
             <div className="space-y-2 pt-3 border-t border-gray-100 text-xs text-gray-600">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="font-semibold text-gray-900">₹{subtotal}</span>
+                <span className="font-semibold text-gray-900">£{Number(subtotal).toFixed(2)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-semibold">
                   <span>Discount</span>
-                  <span>-₹{discount}</span>
+                  <span>-£{Number(discount).toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{shipping === 0 ? <b className="text-emerald-600">FREE</b> : `₹${shipping}`}</span>
+                <span>{shipping === 0 ? <b className="text-emerald-600">FREE</b> : `£${Number(shipping).toFixed(2)}`}</span>
               </div>
               <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
                 <span>Total Payable</span>
-                <span className="text-rose-700 text-xl font-black">₹{total}</span>
+                <span className="text-rose-700 text-xl font-black">£{Number(total).toFixed(2)}</span>
               </div>
             </div>
 
@@ -578,7 +525,7 @@ export default function CheckoutPage() {
               className="w-full py-4 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition-all shadow-lg shadow-rose-200 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <ShieldCheck className="w-4 h-4" />
-              {loading ? 'Processing Order...' : `Pay ₹${total} & Place Order`}
+              {loading ? (paymentMethod === 'STRIPE' ? 'Redirecting to Stripe...' : 'Placing Order...') : paymentMethod === 'COD' ? 'Place COD Order' : `Pay £${Number(total).toFixed(2)} with Stripe`}
             </button>
 
             <p className="text-[10px] text-gray-400 text-center">
