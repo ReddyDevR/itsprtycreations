@@ -36,7 +36,7 @@ model Address {
   city        String
   state       String
   postalCode  String
-  country     String   @default("India")
+  country     String   @default("United Kingdom")
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
@@ -185,7 +185,7 @@ model Payment {
   paymentGateway String   @default("RAZORPAY")
   transactionId  String?
   amount         Float
-  currency       String   @default("INR")
+  currency       String   @default("GBP")
   status         String   // SUCCESS, FAILED, PENDING
   rawResponse    String?  // JSON string
   createdAt      DateTime @default(now())
