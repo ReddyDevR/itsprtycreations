@@ -36,7 +36,7 @@ model Address {
   city        String
   state       String
   postalCode  String
-  country     String   @default("United Kingdom")
+  country     String   @default("India")
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
@@ -149,7 +149,7 @@ model Order {
   discountAmount    Float       @default(0)
   shippingAmount    Float       @default(0)
   paymentStatus     String      @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
-  paymentMethod     String      @default("RAZORPAY") // RAZORPAY, COD
+  paymentMethod     String      @default("STRIPE") // STRIPE, COD
   razorpayOrderId   String?
   razorpayPaymentId String?
   shippingAddress   String      // JSON stringified address
@@ -182,7 +182,7 @@ model OrderItem {
 model Payment {
   id             String   @id @default(cuid())
   orderId        String
-  paymentGateway String   @default("RAZORPAY")
+  paymentGateway String   @default("STRIPE")
   transactionId  String?
   amount         Float
   currency       String   @default("GBP")
