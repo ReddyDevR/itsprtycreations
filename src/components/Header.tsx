@@ -16,6 +16,7 @@ import {
   ChevronDown,
   LogOut,
   Package,
+  Shield,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
