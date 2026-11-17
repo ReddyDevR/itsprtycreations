@@ -136,7 +136,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   <div className="flex flex-col">
     <span className="text-lg font-extrabold text-gray-900">
-      ₹{product.sellingPrice}
+      £{Number(product.sellingPrice).toFixed(2)}
     </span>
 
     <span className="text-[10px] text-emerald-600 font-medium">
