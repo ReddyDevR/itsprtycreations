@@ -124,7 +124,7 @@ export const Footer: React.FC = () => {
 
             <div className="mt-4 flex items-center gap-2 text-[11px] text-stone-400">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>100% Secure Checkout via Razorpay</span>
+              <span>Secure Online Payments via Stripe</span>
             </div>
           </div>
         </div>
