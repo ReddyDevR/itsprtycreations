@@ -194,7 +194,7 @@ const discountPercent = 0;
 <div className="flex flex-col gap-1">
 
   <span className="text-3xl font-black text-rose-950">
-    ₹{product.sellingPrice}
+    £{Number(product.sellingPrice).toFixed(2)}
   </span>
 
   <span className="text-xs font-semibold text-emerald-600">
@@ -203,7 +203,7 @@ const discountPercent = 0;
 
 </div>
           <p className="text-[11px] text-gray-500">
-            Inclusive of all taxes &bull; <b>Free shipping</b> on orders above ₹499
+            UK delivery available • Secure online checkout
           </p>
 
           {/* Variations Selector */}
