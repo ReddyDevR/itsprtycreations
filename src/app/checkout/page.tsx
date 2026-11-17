@@ -92,7 +92,7 @@ export default function CheckoutPage() {
           city,
           state,
           postalCode,
-          country: 'India',
+          country: 'United Kingdom',
         },
         items: items.map((i) => ({
           productId: i.productId,
@@ -374,7 +374,7 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Hyderabad"
+                  placeholder="e.g. London"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
@@ -386,7 +386,7 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Telangana"
+                  placeholder="e.g. Greater London"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
@@ -394,15 +394,18 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Postal Pincode *</label>
-                <input
-                  type="text"
-                  required
-                  maxLength={6}
-                  placeholder="500033"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+  UK Postcode *
+</label>
+
+<input
+  type="text"
+  required
+  maxLength={10}
+  placeholder="SW1A 1AA"
+  value={postalCode}
+  onChange={(e) => setPostalCode(e.target.value)}
+                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
                 />
               </div>
             </div>
