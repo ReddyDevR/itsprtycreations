@@ -47,14 +47,9 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
   const isFavorited = isInWishlist(product.id);
 
-  const currentPrice =
-    product.sellingPrice + (selectedVariation ? selectedVariation.priceAdjustment : 0);
-  const originalPrice =
-    product.originalPrice + (selectedVariation ? selectedVariation.priceAdjustment : 0);
-  const discountPercent =
-    originalPrice > currentPrice
-      ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
-      : 0;
+  const currentPrice = product.sellingPrice;
+const originalPrice = product.sellingPrice;
+const discountPercent = 0;
 
   const handleAddToCart = () => {
     addToCart(product, quantity, selectedVariation, personalization.trim() || null);
@@ -195,18 +190,18 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
             </button>
           </div>
 
-          {/* Pricing */}
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-black text-rose-950">₹{currentPrice}</span>
-            {originalPrice > currentPrice && (
-              <span className="text-base text-gray-400 line-through">₹{originalPrice}</span>
-            )}
-            {discountPercent > 0 && (
-              <span className="text-xs font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">
-                Save ₹{originalPrice - currentPrice} ({discountPercent}%)
-              </span>
-            )}
-          </div>
+          {/* Fixed Selling Price */}
+<div className="flex flex-col gap-1">
+
+  <span className="text-3xl font-black text-rose-950">
+    ₹{product.sellingPrice}
+  </span>
+
+  <span className="text-xs font-semibold text-emerald-600">
+    Fixed Selling Price
+  </span>
+
+</div>
           <p className="text-[11px] text-gray-500">
             Inclusive of all taxes &bull; <b>Free shipping</b> on orders above ₹499
           </p>
