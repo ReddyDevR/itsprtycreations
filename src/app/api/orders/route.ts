@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../lib/prisma';
 import { getAuthUser } from '../../../lib/auth';
-import { createRazorpayOrder } from '../../../lib/razorpay';
 
 export async function GET(req: NextRequest) {
   try {
@@ -66,7 +65,7 @@ export async function POST(req: NextRequest) {
       shippingAddress,
       items,
       couponCode,
-      paymentMethod, // "RAZORPAY" | "COD"
+      paymentMethod, // STRIPE or COD
       notes,
     } = body;
 
@@ -135,24 +134,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Shipping calculation (free over ₹499, else ₹49)
-    const shippingAmount = subtotal - discountAmount >= 499 ? 0 : 49;
+    // UK shipping calculation (free over £50, otherwise £4.99)
+    const shippingAmount = subtotal - discountAmount >= 50 ? 0 : 4.99;
     const totalAmount = Math.max(0, subtotal - discountAmount + shippingAmount);
 
     const orderNumber = `LTS-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
-    // Create Razorpay Order if payment method is RAZORPAY
-    let razorpayOrder = null;
-    if (paymentMethod === 'RAZORPAY') {
-      razorpayOrder = await createRazorpayOrder({
-        amount: totalAmount,
-        currency: 'INR',
-        receipt: orderNumber,
-        notes: {
-          customerName,
-          customerEmail,
-        },
-      });
+    if (!['STRIPE', 'COD'].includes(paymentMethod)) {
+      return NextResponse.json({ error: 'Please select Stripe online payment or Cash on Delivery.' }, { status: 400 });
     }
 
     // Save order in database
@@ -163,19 +152,29 @@ export async function POST(req: NextRequest) {
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim().toLowerCase(),
         customerPhone: customerPhone.trim(),
-        status: paymentMethod === 'COD' ? 'CONFIRMED' : 'PENDING',
+        status: 'PENDING',
         totalAmount,
         subtotal,
         discountAmount,
         shippingAmount,
         paymentStatus: 'PENDING',
-        paymentMethod: paymentMethod || 'RAZORPAY',
-        razorpayOrderId: razorpayOrder ? razorpayOrder.id : null,
+        paymentMethod,
         shippingAddress: typeof shippingAddress === 'string' ? shippingAddress : JSON.stringify(shippingAddress),
         notes: notes || null,
         items: {
           create: orderItemsData,
         },
+        ...(paymentMethod === 'COD' ? {
+          payments: {
+            create: {
+              paymentGateway: 'COD',
+              amount: totalAmount,
+              currency: 'GBP',
+              status: 'PENDING',
+              rawResponse: JSON.stringify({ method: 'Cash on Delivery' }),
+            },
+          },
+        } : {}),
       },
       include: {
         items: true,
@@ -191,7 +190,6 @@ export async function POST(req: NextRequest) {
       success: true,
       message: 'Order created successfully',
       order,
-      razorpayOrder,
     });
   } catch (error: any) {
     console.error('Create order error:', error);
