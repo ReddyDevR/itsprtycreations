@@ -181,10 +181,17 @@ for (const img of images) {
 }
     const allItemsCategory = await ensureAllItemsCategory();
 
-    const origPrice = Number(originalPrice) || Number(sellingPrice);
     const sellPrice = Number(sellingPrice);
-    const discountPercent =
-      origPrice > sellPrice ? Math.round(((origPrice - sellPrice) / origPrice) * 100) : 0;
+
+if (!Number.isFinite(sellPrice) || sellPrice <= 0) {
+  return NextResponse.json(
+    { error: 'Enter a valid selling price.' },
+    { status: 400 }
+  );
+}
+
+const origPrice = sellPrice;
+const discountPercent = 0;
 
     let baseSlug = slugify(title);
     let slug = baseSlug;
