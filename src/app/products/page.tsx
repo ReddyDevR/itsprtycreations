@@ -17,13 +17,10 @@ interface ProductsPageProps {
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { category, search, sort = 'newest', featured, bestseller, newarrival } = searchParams;
+  const { search, sort = 'newest', featured, bestseller, newarrival } = searchParams;
 
   const where: any = { isPublished: true };
 
-  if (category) {
-    where.category = { slug: category };
-  }
 
   if (search) {
     where.OR = [
@@ -41,25 +38,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   if (sort === 'price-high') orderBy = { sellingPrice: 'desc' };
   if (sort === 'title-asc') orderBy = { title: 'asc' };
 
-  const [products, categories, activeCategory] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      orderBy,
-      include: {
-        category: true,
-        images: { orderBy: { displayOrder: 'asc' } },
-        variations: true,
-      },
-    }),
-    prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: { displayOrder: 'asc' },
-      include: { _count: { select: { products: true } } },
-    }),
-    category
-      ? prisma.category.findUnique({ where: { slug: category } })
-      : null,
-  ]);
+  const products = await prisma.product.findMany({
+    where,
+    orderBy,
+    include: {
+      category: true,
+      images: { orderBy: { displayOrder: 'asc' } },
+      variations: true,
+    },
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -70,40 +57,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             Official LTS Party Creations Catalog
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl font-bold mt-1">
-            {activeCategory ? activeCategory.name : 'All Greeting Cards & Stationery'}
+            All Items
           </h1>
           <p className="text-xs sm:text-sm text-rose-200 mt-2 font-light">
-            {activeCategory?.description ||
-              'Explore handcrafted greeting cards, party favor wrappers, and bespoke celebration suites with transparent pricing.'}
+            Explore all products in one place, with transparent pricing.
           </p>
         </div>
-      </div>
-
-      {/* Category Pills Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <Link
-          href="/products"
-          className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-            !category
-              ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
-              : 'bg-white text-gray-700 border border-gray-200 hover:border-rose-300 hover:text-rose-700'
-          }`}
-        >
-          All Greetings
-        </Link>
-        {categories.map((cat) => (
-          <Link
-            key={cat.id}
-            href={`/products?category=${cat.slug}`}
-            className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-              category === cat.slug
-                ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
-                : 'bg-white text-gray-700 border border-gray-200 hover:border-rose-300 hover:text-rose-700'
-            }`}
-          >
-            {cat.name} ({cat._count?.products || 0})
-          </Link>
-        ))}
       </div>
 
       {/* Filters & Results Counter */}
