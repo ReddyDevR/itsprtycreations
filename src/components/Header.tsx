@@ -41,7 +41,7 @@ export const Header: React.FC = () => {
     <>
       {/* Store announcement bar - independent of any marketplace reference */}
       <div className="bg-gradient-to-r from-rose-900 via-rose-800 to-amber-900 px-4 py-2 text-center text-[11px] font-medium tracking-wide text-white sm:text-xs">
-        Free Nationwide Delivery on Orders Above ₹499 | Use Code <b className="text-amber-300">PARTY20</b> for 20% OFF!
+        Free UK Delivery on Qualifying Orders | Use Code <b className="text-amber-300">PARTY20</b> for 20% OFF!
       </div>
       {/* Main Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-rose-100 shadow-xs">
