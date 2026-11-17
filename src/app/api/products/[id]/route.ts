@@ -82,22 +82,54 @@ export async function PUT(
     const discountPercent =
       origPrice > sellPrice ? Math.round(((origPrice - sellPrice) / origPrice) * 100) : 0;
 
-    // Update images if provided (maximum 6 per product).
-    if (Array.isArray(body.images)) {
-      if (body.images.length > 6) return NextResponse.json({ error: 'A product can contain a maximum of 6 images.' }, { status: 400 });
-      if (body.images.some((img: any) => !(typeof img === 'string' ? img : img?.url))) return NextResponse.json({ error: 'Every product image must have a valid URL.' }, { status: 400 });
-      await prisma.productImage.deleteMany({ where: { productId: id } });
-      await prisma.productImage.createMany({
-        data: body.images.map((img: any, idx: number) => ({
-          productId: id,
-          url: typeof img === 'string' ? img : img.url,
-          alt: typeof img === 'string' ? `${body.title || existing.title} view` : (img.alt || 'Product view'),
-          isPrimary: idx === 0,
-          displayOrder: idx,
-        })),
-      });
+    // Update product images and videos
+if (Array.isArray(body.images)) {
+
+  if (body.images.length < 1 || body.images.length > 6) {
+    return NextResponse.json(
+      { error: 'Add between 1 and 6 media URLs.' },
+      { status: 400 }
+    );
+  }
+
+  const mediaItems = body.images.map((img: any) => {
+    const url = (
+      typeof img === 'string' ? img : img?.url
+    )?.trim();
+
+    if (!url) {
+      throw new Error('Invalid media URL.');
     }
 
+    const parsed = new URL(url);
+
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('Only HTTP and HTTPS URLs are supported.');
+    }
+
+    return {
+      url,
+      mediaType: parsed.pathname.toLowerCase().endsWith('.mp4')
+        ? 'VIDEO'
+        : 'IMAGE',
+    };
+  });
+
+  await prisma.productImage.deleteMany({
+    where: { productId: id },
+  });
+
+  await prisma.productImage.createMany({
+    data: mediaItems.map((item, idx) => ({
+      productId: id,
+      url: item.url,
+      mediaType: item.mediaType,
+      alt: `${body.title || existing.title} media ${idx + 1}`,
+      isPrimary: idx === 0,
+      displayOrder: idx,
+    })),
+  });
+}
     // Update variations if provided
     if (Array.isArray(body.variations)) {
       await prisma.productVariation.deleteMany({ where: { productId: id } });
