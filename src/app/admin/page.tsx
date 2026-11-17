@@ -653,32 +653,102 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
   </div>
 
 
-  {/* IMAGE URL INPUTS - one textbox for every selected image */}
-  {imageSource === 'url' && (
-    <div className="space-y-3 rounded-2xl border border-stone-200 bg-stone-50 p-4">
-      <p className="text-xs font-bold text-stone-800">Enter up to {imageLimit} product image URLs</p>
-      {Array.from({ length: imageLimit }, (_, index) => (
-        <div key={index} className="space-y-1">
-          <label className="text-[11px] font-semibold text-stone-600">Image URL {index + 1}{index === 0 ? ' (Main Image)' : ''}</label>
+  {/* PRODUCT MEDIA URL INPUTS */}
+{imageSource === 'url' && (
+  <div className="space-y-4 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+
+    <div>
+      <h3 className="text-sm font-bold text-stone-900">
+        Product Images & Videos
+      </h3>
+
+      <p className="text-xs text-stone-500 mt-1">
+        Add image URLs or MP4 video URLs. Maximum 6 media files.
+      </p>
+    </div>
+
+    {Array.from({ length: imageLimit }, (_, index) => {
+      const mediaUrl = newImageUrls[index]?.trim() || '';
+
+      let isVideo = false;
+
+      try {
+        isVideo = new URL(mediaUrl).pathname
+          .toLowerCase()
+          .endsWith('.mp4');
+      } catch {
+        // Empty or invalid URL: show URL input only.
+      }
+
+      return (
+        <div
+          key={index}
+          className="space-y-2 rounded-xl border border-stone-200 bg-white p-3"
+        >
+
+          <label className="text-xs font-bold text-stone-700">
+            Media URL {index + 1}
+            {index === 0 ? ' (Primary Media)' : ''}
+          </label>
+
           <input
             type="url"
-            placeholder="https://example.com/product-image.jpg"
+            placeholder="https://example.com/product-image.jpg or video.mp4"
             value={newImageUrls[index] || ''}
-            onChange={(e) => setNewImageUrls((current) => {
-              const updated = [...current];
-              updated[index] = e.target.value;
-              return updated;
-            })}
-            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs outline-none focus:ring-2 focus:ring-rose-400"
+            onChange={(e) =>
+              setNewImageUrls((current) => {
+                const updated = [...current];
+                updated[index] = e.target.value;
+                return updated;
+              })
+            }
+            className="w-full rounded-xl border border-stone-200 px-3 py-3 text-xs outline-none focus:ring-2 focus:ring-rose-400"
           />
-          {newImageUrls[index]?.trim() && (
-            <img src={newImageUrls[index]} alt={`Preview ${index + 1}`} className="mt-2 h-24 w-24 rounded-lg border object-cover" onError={(e) => { e.currentTarget.style.opacity = '0.35'; }} />
-          )}
-        </div>
-      ))}
-    </div>
-  )}
 
+          {mediaUrl && (
+            <div className="mt-2">
+
+              {isVideo ? (
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-purple-700">
+                    VIDEO PREVIEW
+                  </span>
+
+                  <video
+                    key={mediaUrl}
+                    src={mediaUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full max-w-sm aspect-video rounded-xl bg-black"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-emerald-700">
+                    IMAGE PREVIEW
+                  </span>
+
+                  <img
+                    src={mediaUrl}
+                    alt={`Product media ${index + 1}`}
+                    className="h-32 w-32 rounded-xl border object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.opacity = '0.35';
+                    }}
+                  />
+                </div>
+              )}
+
+            </div>
+          )}
+
+        </div>
+      );
+    })}
+
+  </div>
+)}
   {/* IMAGE INFORMATION */}
   <div className="rounded-xl bg-blue-50 p-3">
 
