@@ -131,7 +131,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
         <div className="lg:col-span-5 space-y-6 bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-sm">
           {product.category && (
             <span className="text-xs uppercase font-bold tracking-wider text-rose-600 bg-rose-50 px-3 py-1 rounded-full">
-              {product.category.name}
+              All Items
             </span>
           )}
 
