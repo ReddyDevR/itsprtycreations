@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Sparkles,
   Package,
-  Layers,
   ShoppingBag,
   Users,
   Settings,
@@ -22,7 +21,6 @@ import {
   Clock,
   ExternalLink,
   Search,
-  Upload,
   RefreshCw,
   AlertTriangle,
   FileText,
@@ -30,14 +28,14 @@ import {
   Truck,
   Save,
 } from 'lucide-react';
-import { Product, Category, Order, User } from '@/types';
+import { Product, Order, User } from '@/types';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { user, loading: authLoading, isAdmin } = useAuth();
 
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'dynamic-greeting' | 'products' | 'categories' | 'orders' | 'customers' | 'settings'
+    'overview' | 'dynamic-greeting' | 'products' | 'orders' | 'customers' | 'settings'
   >('overview');
 
   // Stats
@@ -46,15 +44,7 @@ export default function AdminDashboardPage() {
 
   // Products
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
 
-// Greeting Category Management
-const [categoryName, setCategoryName] = useState('');
-const [categoryDescription, setCategoryDescription] = useState('');
-const [categoryImage, setCategoryImage] = useState('');
-const [categorySaving, setCategorySaving] = useState(false);
-const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
 
@@ -69,17 +59,14 @@ const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIV
 
   // Dynamic Greeting Form States
   const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState('');
   const [newOriginalPrice, setNewOriginalPrice] = useState('399');
   const [newSellingPrice, setNewSellingPrice] = useState('249');
   const [newDescription, setNewDescription] = useState('');
   const [newDetails, setNewDetails] = useState('');
   const [newImageUrls, setNewImageUrls] = useState<string[]>([]);
-const [uploadingImages, setUploadingImages] = useState(false);
-const [imageUrlInput, setImageUrlInput] = useState('');
 
 // Product Image Management
-const [imageSource, setImageSource] = useState<'device' | 'url'>('device');
+const [imageSource, setImageSource] = useState<'url'>('url');
 const [imageLimit, setImageLimit] = useState(6);
   const [newStock, setNewStock] = useState('100');
   const [newIsFeatured, setNewIsFeatured] = useState(false);
@@ -117,39 +104,7 @@ const [imageLimit, setImageLimit] = useState(6);
       const prodData = await prodRes.json();
       if (prodData.success) setProducts(prodData.products);
 
-     // 3. Categories - Reliable category loading
-const catRes = await fetch('/api/categories?all=true', {
-  cache: 'no-store',
-});
-
-const catData = await catRes.json();
-
-if (!catRes.ok || !catData.success) {
-  throw new Error(catData.error || 'Failed to load greeting categories');
-}
-
-const loadedCategories = Array.isArray(catData.categories)
-  ? catData.categories
-  : [];
-
-setCategories(loadedCategories);
-
-// Only select active categories for product creation
-const activeCategories = loadedCategories.filter(
-  (category: Category) => category.isActive === true
-);
-
-setNewCategory((previousCategory) => {
-  const previousIsValid = activeCategories.some(
-    (category: Category) => category.id === previousCategory
-  );
-
-  if (previousIsValid) return previousCategory;
-
-  return activeCategories.length > 0
-    ? activeCategories[0].id
-    : '';
-});
+      // Products are automatically assigned to the single All Items category by the API.
 
       // 4. Orders
       const ordRes = await fetch('/api/orders');
@@ -183,132 +138,16 @@ setNewCategory((previousCategory) => {
     setTimeout(() => setFeedbackMsg(null), 5000);
   };
 
- // Upload selected product images to Cloudinary (maximum 6).
-const handleProductImageFiles = async (files: FileList | null) => {
-  if (!files?.length) return;
-
-  const selected = Array.from(files);
-
-  if (newImageUrls.length + selected.length > imageLimit) {
-    notify(
-      `You can add only ${imageLimit} images. Already selected: ${newImageUrls.length}.`,
-      true
-    );
-    return;
-  }
-
-  const validFiles = selected.filter((file) =>
-    file.type.startsWith('image/')
-  );
-
-  if (validFiles.length !== selected.length) {
-    notify('Please select valid image files only.', true);
-    return;
-  }
-
-  const oversizedFile = validFiles.find(
-    (file) => file.size > 10 * 1024 * 1024
-  );
-
-  if (oversizedFile) {
-    notify(`${oversizedFile.name} exceeds the 10 MB limit.`, true);
-    return;
-  }
-
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-  if (!cloudName || !uploadPreset) {
-    notify(
-      'Configure Cloudinary environment variables first.',
-      true
-    );
-    return;
-  }
-
-  setUploadingImages(true);
-
-  try {
-    const uploaded: string[] = [];
-
-    for (const file of validFiles) {
-      const form = new FormData();
-
-      form.append('file', file);
-      form.append('upload_preset', uploadPreset);
-      form.append('folder', 'store-products');
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-          method: 'POST',
-          body: form,
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.secure_url) {
-        throw new Error(
-          result.error?.message || `Upload failed: ${file.name}`
-        );
-      }
-
-      uploaded.push(result.secure_url);
-    }
-
-    setNewImageUrls((current) => [...current, ...uploaded]);
-
-    notify(`${uploaded.length} image(s) uploaded successfully.`);
-
-  } catch (error: any) {
-    notify(error.message || 'Image upload failed.', true);
-
-  } finally {
-    setUploadingImages(false);
-  }
-};
-  const addProductImageUrl = () => {
-  const url = imageUrlInput.trim();
-
-  if (!url) {
-    notify('Please enter an image URL.', true);
-    return;
-  }
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      throw new Error('Invalid protocol');
-    }
-  } catch {
-    notify('Please enter a valid HTTP or HTTPS image URL.', true);
-    return;
-  }
-
-  if (newImageUrls.length >= imageLimit) {
-    notify(
-      `Maximum ${imageLimit} images allowed.`,
-      true
-    );
-    return;
-  }
-
-  setNewImageUrls((current) => [...current, url]);
-
-  setImageUrlInput('');
-};
-
   // ADD DYNAMIC GREETING CARD (Core Requirement)
   const handleAddDynamicGreeting = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newImageUrls.length === 0) {
+    const validImageUrls = newImageUrls.map((url) => url.trim()).filter(Boolean);
+    if (validImageUrls.length === 0) {
   notify('Please add at least one product image.', true);
   return;
 }
 
-if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
+if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
   notify(`Maximum ${imageLimit} images are allowed.`, true);
   return;
 }
@@ -317,7 +156,6 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
     try {
       const payload = {
         title: newTitle,
-        categoryId: newCategory,
         originalPrice: Number(newOriginalPrice),
         sellingPrice: Number(newSellingPrice),
         description: newDescription,
@@ -326,7 +164,7 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
         isFeatured: newIsFeatured,
         isBestSeller: newIsBestSeller,
         isPublished: true,
-        images: newImageUrls,
+        images: validImageUrls,
         variations: [
           { name: 'Format', value: 'Instant Canva Template Download', priceAdjustment: 0 },
           { name: 'Format', value: 'Luxury 350 GSM Printed Cardstock', priceAdjustment: 350 },
@@ -350,9 +188,8 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
       setNewDetails('');
 
       setNewImageUrls([]);
-      setImageUrlInput('');
 
-      setImageSource('device');
+      setImageSource('url');
       setImageLimit(6);
 
       loadAllData();
@@ -379,8 +216,7 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
           originalPrice: editingProduct.originalPrice,
           sellingPrice: editingProduct.sellingPrice,
           stock: editingProduct.stock,
-          categoryId: editingProduct.categoryId,
-          isPublished: editingProduct.isPublished,
+            isPublished: editingProduct.isPublished,
           isFeatured: editingProduct.isFeatured,
           isBestSeller: editingProduct.isBestSeller,
         }),
@@ -412,136 +248,6 @@ if (newImageUrls.length > imageLimit || newImageUrls.length > 6) {
       notify(err.message, true);
     }
   };
-
-  // ADD / UPDATE GREETING CATEGORY
-const handleSaveCategory = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  if (!categoryName.trim()) {
-    notify('Please enter category name.', true);
-    return;
-  }
-
-  setCategorySaving(true);
-
-  try {
-    const res = await fetch('/api/categories', {
-      method: editingCategory ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(
-        editingCategory
-          ? {
-              id: editingCategory.id,
-              name: categoryName.trim(),
-              description: categoryDescription,
-              image: categoryImage,
-            }
-          : {
-              name: categoryName.trim(),
-              description: categoryDescription,
-              image: categoryImage,
-              isActive: true,
-            }
-      ),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to save category');
-    }
-
-    notify(
-      editingCategory
-        ? 'Category updated successfully.'
-        : 'New category created successfully.'
-    );
-
-    setCategoryName('');
-    setCategoryDescription('');
-    setCategoryImage('');
-    setEditingCategory(null);
-
-    await loadAllData();
-
-  } catch (error: any) {
-    notify(error.message, true);
-  } finally {
-    setCategorySaving(false);
-  }
-};
-
-// EDIT CATEGORY
-const handleEditCategory = (category: Category) => {
-  setEditingCategory(category);
-  setCategoryName(category.name);
-  setCategoryDescription(category.description || '');
-  setCategoryImage(category.image || '');
-};
-
-// TOGGLE CATEGORY STATUS
-const handleToggleCategory = async (
-  id: string,
-  currentStatus: boolean
-) => {
-  try {
-    const res = await fetch('/api/categories', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id,
-        isActive: !currentStatus,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to update category');
-    }
-
-    notify(
-      !currentStatus
-        ? 'Category activated successfully.'
-        : 'Category deactivated successfully.'
-    );
-
-    await loadAllData();
-
-  } catch (error: any) {
-    notify(error.message, true);
-  }
-};
-
-// LOAD DEFAULT CATEGORIES
-const handleInitializeCategories = async () => {
-  if (
-    !confirm('Add all 14 default greeting categories?')
-  ) return;
-
-  try {
-    const res = await fetch('/api/categories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'seedDefaults',
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to initialize categories');
-    }
-
-    notify('Default greeting categories added successfully!');
-
-    await loadAllData();
-
-  } catch (error: any) {
-    notify(error.message, true);
-  }
-};
 
   // UPDATE ORDER STATUS & TRACKING
   const handleUpdateOrderStatus = async () => {
@@ -644,7 +350,6 @@ const handleInitializeCategories = async () => {
             { id: 'overview', label: 'Dashboard Overview', icon: LayoutDashboard },
             { id: 'dynamic-greeting', label: '✨ Add Greeting Card', icon: Sparkles, highlight: true },
             { id: 'products', label: `Products (${products.length})`, icon: Package },
-            { id: 'categories', label: `Categories (${categories.length})`, icon: Layers },
             { id: 'orders', label: `Orders (${orders.length})`, icon: ShoppingBag },
             { id: 'customers', label: `Customers (${customers.length})`, icon: Users },
             { id: 'settings', label: 'Website Settings', icon: Settings },
@@ -802,7 +507,7 @@ const handleInitializeCategories = async () => {
                   </span>
                   <h3 className="font-serif font-bold text-xl mt-2">Dynamic Greeting Card Studio</h3>
                   <p className="text-xs text-rose-100 mt-2 leading-relaxed font-light">
-                    Add new greeting cards anytime. Everything saved here is immediately written to the database and displayed on the customer website across categories and product listings.
+                    Add new greeting cards anytime. Everything saved here is immediately written to the database and displayed on the customer website under All Items.
                   </p>
                 </div>
 
@@ -829,7 +534,7 @@ const handleInitializeCategories = async () => {
                 Add & Publish New Greeting Card
               </h2>
               <p className="text-xs text-stone-500 mt-1">
-                Whenever you add a greeting card here, it automatically appears on the customer website under its selected category!
+                Whenever you add a product here, it automatically appears on the customer website under All Items!
               </p>
             </div>
 
@@ -849,63 +554,6 @@ const handleInitializeCategories = async () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
-  Greeting Category *
-</label>
-
-<select
-  required
-  value={newCategory}
-  onChange={(e) => setNewCategory(e.target.value)}
-  disabled={!categories.some((c) => c.isActive === true)}
-  className="w-full px-3 py-2.5 text-xs border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white disabled:bg-stone-100 disabled:cursor-not-allowed"
->
-  <option value="">
-    Select Greeting Category
-  </option>
-
-  {categories
-    .filter((category) => category.isActive === true)
-    .sort(
-      (a, b) =>
-        Number(a.displayOrder ?? 0) -
-        Number(b.displayOrder ?? 0)
-    )
-    .map((category) => (
-      <option
-        key={category.id}
-        value={category.id}
-      >
-        {category.name}
-      </option>
-    ))}
-</select>
-
-{categories.filter((c) => c.isActive === true).length === 0 && (
-  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-
-    <p className="text-xs font-semibold text-amber-800">
-      No Active Greeting Categories
-    </p>
-
-    <p className="text-[11px] text-amber-700 mt-1">
-      Please add a new category or activate an existing category
-      from Category Management.
-    </p>
-
-    <button
-      type="button"
-      onClick={() => setActiveTab('categories')}
-      className="mt-3 rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 transition-colors"
-    >
-      Manage Greeting Categories →
-    </button>
-
-  </div>
-)}
-                </div>
-
                 <div>
                   <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
                     Selling Price (₹) *
@@ -950,7 +598,7 @@ const handleInitializeCategories = async () => {
     </div>
 
     <span className="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">
-      {newImageUrls.length}/{imageLimit} Images
+      {newImageUrls.filter((url) => Boolean(url?.trim())).length}/{imageLimit} Images
     </span>
 
   </div>
@@ -968,14 +616,14 @@ const handleInitializeCategories = async () => {
 
       <select
         value={imageLimit}
-        onChange={(e) => setImageLimit(Number(e.target.value))}
+        onChange={(e) => { const count = Number(e.target.value); setImageLimit(count); setNewImageUrls((current) => current.slice(0, count)); }}
         className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs font-medium outline-none focus:ring-2 focus:ring-rose-400"
       >
         {[1, 2, 3, 4, 5, 6].map((count) => (
           <option
             key={count}
             value={count}
-            disabled={count < newImageUrls.length}
+            
           >
             {count} {count === 1 ? 'Image' : 'Images'}
           </option>
@@ -994,13 +642,10 @@ const handleInitializeCategories = async () => {
 
       <select
         value={imageSource}
-        onChange={(e) =>
-          setImageSource(e.target.value as 'device' | 'url')
-        }
+        onChange={() => setImageSource('url')}
         className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs font-medium outline-none focus:ring-2 focus:ring-rose-400"
       >
-        <option value="device">Upload From Device</option>
-        <option value="url">Add Image URLs</option>
+        <option value="url">Image URL Only</option>
       </select>
 
     </div>
@@ -1008,189 +653,31 @@ const handleInitializeCategories = async () => {
   </div>
 
 
-  {/* DEVICE IMAGE UPLOAD */}
-  {imageSource === 'device' && (
-
-    <div className="space-y-3">
-
-      <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/50 p-6 text-center transition-all hover:border-rose-500 hover:bg-rose-50">
-
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
-          <Upload className="h-5 w-5 text-rose-600" />
-        </div>
-
-        <div>
-          <p className="text-sm font-bold text-rose-700">
-            {uploadingImages
-              ? 'Uploading Images...'
-              : 'Choose Images From Device'}
-          </p>
-
-          <p className="mt-1 text-[11px] text-stone-500">
-            Select up to {imageLimit - newImageUrls.length} more images
-          </p>
-        </div>
-
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          disabled={
-            uploadingImages ||
-            newImageUrls.length >= imageLimit
-          }
-          onChange={(e) => {
-            handleProductImageFiles(e.target.files);
-            e.currentTarget.value = '';
-          }}
-        />
-
-      </label>
-
-    </div>
-
-  )}
-
-
-  {/* IMAGE URL INPUT */}
+  {/* IMAGE URL INPUTS - one textbox for every selected image */}
   {imageSource === 'url' && (
-
     <div className="space-y-3 rounded-2xl border border-stone-200 bg-stone-50 p-4">
-
-      <div>
-        <p className="text-xs font-bold text-stone-800">
-          Add Product Image URL
-        </p>
-
-        <p className="mt-1 text-[11px] text-stone-500">
-          Paste a publicly accessible image URL.
-        </p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-2">
-
-        <input
-          type="url"
-          placeholder="https://example.com/product-image.jpg"
-          value={imageUrlInput}
-          onChange={(e) => setImageUrlInput(e.target.value)}
-          className="min-w-0 flex-1 rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs outline-none focus:ring-2 focus:ring-rose-400"
-          disabled={newImageUrls.length >= imageLimit}
-        />
-
-        <button
-          type="button"
-          onClick={addProductImageUrl}
-          disabled={
-            !imageUrlInput.trim() ||
-            newImageUrls.length >= imageLimit
-          }
-          className="rounded-xl bg-stone-900 px-5 py-3 text-xs font-bold text-white transition-all hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          + Add Image
-        </button>
-
-      </div>
-
+      <p className="text-xs font-bold text-stone-800">Enter up to {imageLimit} product image URLs</p>
+      {Array.from({ length: imageLimit }, (_, index) => (
+        <div key={index} className="space-y-1">
+          <label className="text-[11px] font-semibold text-stone-600">Image URL {index + 1}{index === 0 ? ' (Main Image)' : ''}</label>
+          <input
+            type="url"
+            placeholder="https://example.com/product-image.jpg"
+            value={newImageUrls[index] || ''}
+            onChange={(e) => setNewImageUrls((current) => {
+              const updated = [...current];
+              updated[index] = e.target.value;
+              return updated;
+            })}
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-xs outline-none focus:ring-2 focus:ring-rose-400"
+          />
+          {newImageUrls[index]?.trim() && (
+            <img src={newImageUrls[index]} alt={`Preview ${index + 1}`} className="mt-2 h-24 w-24 rounded-lg border object-cover" onError={(e) => { e.currentTarget.style.opacity = '0.35'; }} />
+          )}
+        </div>
+      ))}
     </div>
-
   )}
-
-
-  {/* IMAGE PREVIEW GALLERY */}
-  {newImageUrls.length > 0 && (
-
-    <div className="space-y-3">
-
-      <div className="flex items-center justify-between">
-
-        <h4 className="text-xs font-bold text-stone-800">
-          Selected Image Gallery
-        </h4>
-
-        <span className="text-[11px] text-stone-500">
-          {newImageUrls.length} of {imageLimit} selected
-        </span>
-
-      </div>
-
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-
-        {newImageUrls.map((url, index) => (
-
-          <div
-            key={`${url}-${index}`}
-            className="group relative aspect-square overflow-hidden rounded-xl border border-stone-200 bg-stone-100 shadow-sm"
-          >
-
-            <img
-              src={url}
-              alt={`Product preview ${index + 1}`}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-
-            {/* IMAGE NUMBER */}
-            <span className="absolute left-2 top-2 rounded-md bg-black/70 px-2 py-1 text-[10px] font-bold text-white">
-              Image {index + 1}
-            </span>
-
-
-            {/* MAIN IMAGE BADGE */}
-            {index === 0 && (
-
-              <span className="absolute bottom-2 left-2 rounded-md bg-emerald-600 px-2 py-1 text-[9px] font-bold uppercase text-white">
-                Main Image
-              </span>
-
-            )}
-
-
-            {/* REMOVE IMAGE */}
-            <button
-              type="button"
-              onClick={() =>
-                setNewImageUrls((current) =>
-                  current.filter((_, i) => i !== index)
-                )
-              }
-              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white shadow-md transition-all hover:bg-red-700"
-              aria-label={`Remove image ${index + 1}`}
-            >
-              ×
-            </button>
-
-          </div>
-
-        ))}
-
-      </div>
-
-    </div>
-
-  )}
-
-
-  {/* EMPTY IMAGE STATE */}
-  {newImageUrls.length === 0 && (
-
-    <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 py-8 text-center">
-
-      <Upload className="mx-auto h-8 w-8 text-stone-300" />
-
-      <p className="mt-2 text-xs font-semibold text-stone-600">
-        No Product Images Added
-      </p>
-
-      <p className="mt-1 text-[11px] text-stone-400">
-        Select an image source and add your product images.
-      </p>
-
-    </div>
-
-  )}
-
 
   {/* IMAGE INFORMATION */}
   <div className="rounded-xl bg-blue-50 p-3">
@@ -1198,9 +685,7 @@ const handleInitializeCategories = async () => {
     <p className="text-[11px] leading-relaxed text-blue-800">
       <strong>Image Guidelines:</strong> The first image automatically
       becomes the main product image. All remaining images appear in
-      the customer product gallery. Images uploaded from your device
-      are stored in Cloudinary. URL images use their original image
-      addresses.
+      the customer product gallery. Product images are loaded directly from the URLs you entered.
     </p>
 
   </div>
@@ -1331,7 +816,7 @@ const handleInitializeCategories = async () => {
                               </Link>
                             </div>
                           </td>
-                          <td className="py-3 px-4 text-stone-600">{p.category?.name}</td>
+                          <td className="py-3 px-4 text-stone-600">All Items</td>
                           <td className="py-3 px-4 font-bold text-stone-900">₹{p.sellingPrice}</td>
                           <td className="py-3 px-4">
                             {p.discountPercent > 0 ? (
@@ -1379,301 +864,7 @@ const handleInitializeCategories = async () => {
           </div>
         )}
 
-       {/* TAB 4: CATEGORIES MANAGEMENT */}
-{activeTab === 'categories' && (
-  <div className="space-y-6">
-
-    {/* HEADER */}
-    <div className="bg-white rounded-3xl border border-stone-200 p-6">
-
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-        <div>
-          <h3 className="font-serif font-bold text-2xl text-stone-900">
-            Greeting Categories
-          </h3>
-
-          <p className="text-sm text-stone-500 mt-1">
-            Create, manage and organize all greeting card categories.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleInitializeCategories}
-          className="px-5 py-3 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-700 transition-all"
-        >
-          <Plus className="w-4 h-4 inline mr-2" />
-          Initialize Default 14 Categories
-        </button>
-
-      </div>
-
-      {/* CATEGORY STATISTICS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-
-        <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200">
-          <p className="text-xs text-stone-500 font-semibold">
-            Total Categories
-          </p>
-
-          <h3 className="text-3xl font-bold text-stone-900 mt-2">
-            {categories.length}
-          </h3>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100">
-          <p className="text-xs text-emerald-700 font-semibold">
-            Active Categories
-          </p>
-
-          <h3 className="text-3xl font-bold text-emerald-700 mt-2">
-            {categories.filter(c => c.isActive).length}
-          </h3>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-red-50 border border-red-100">
-          <p className="text-xs text-red-700 font-semibold">
-            Inactive Categories
-          </p>
-
-          <h3 className="text-3xl font-bold text-red-700 mt-2">
-            {categories.filter(c => !c.isActive).length}
-          </h3>
-        </div>
-
-      </div>
-
-    </div>
-
-    {/* ADD / EDIT CATEGORY */}
-    <div className="bg-white rounded-3xl border border-stone-200 p-6">
-
-      <h3 className="font-bold text-lg text-stone-900 mb-5">
-        {editingCategory
-          ? 'Edit Greeting Category'
-          : 'Add New Greeting Category'}
-      </h3>
-
-      <form
-        onSubmit={handleSaveCategory}
-        className="grid grid-cols-1 md:grid-cols-2 gap-5"
-      >
-
-        <div>
-          <label className="block text-xs font-bold mb-2 text-stone-700">
-            Category Name *
-          </label>
-
-          <input
-            required
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-            placeholder="Example: Baby Shower Greetings"
-            className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold mb-2 text-stone-700">
-            Category Image URL
-          </label>
-
-          <input
-            type="url"
-            value={categoryImage}
-            onChange={(e) => setCategoryImage(e.target.value)}
-            placeholder="https://example.com/category.jpg"
-            className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
-          />
-        </div>
-
-        <div className="md:col-span-2">
-
-          <label className="block text-xs font-bold mb-2 text-stone-700">
-            Category Description
-          </label>
-
-          <textarea
-            value={categoryDescription}
-            onChange={(e) => setCategoryDescription(e.target.value)}
-            placeholder="Enter category description..."
-            rows={3}
-            className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
-          />
-
-        </div>
-
-        <div className="md:col-span-2 flex flex-wrap gap-3">
-
-          <button
-            type="submit"
-            disabled={categorySaving}
-            className="px-6 py-3 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 disabled:opacity-50"
-          >
-            {categorySaving
-              ? 'Saving...'
-              : editingCategory
-                ? 'Update Category'
-                : 'Create Category'}
-          </button>
-
-          {editingCategory && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditingCategory(null);
-                setCategoryName('');
-                setCategoryDescription('');
-                setCategoryImage('');
-              }}
-              className="px-6 py-3 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold"
-            >
-              Cancel Edit
-            </button>
-          )}
-
-        </div>
-
-      </form>
-
-    </div>
-
-    {/* CATEGORY FILTER */}
-    <div className="bg-white rounded-3xl border border-stone-200 p-6">
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-
-        <h3 className="font-bold text-lg text-stone-900">
-          Manage All Categories
-        </h3>
-
-        <div className="flex flex-wrap gap-2">
-
-          {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((filter) => (
-
-            <button
-              key={filter}
-              type="button"
-              onClick={() => setCategoryFilter(filter)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                categoryFilter === filter
-                  ? 'bg-stone-900 text-white'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-              }`}
-            >
-              {filter}
-            </button>
-
-          ))}
-
-        </div>
-
-      </div>
-
-      {/* CATEGORY LIST */}
-      {categories.filter((c) =>
-        categoryFilter === 'ALL'
-          ? true
-          : categoryFilter === 'ACTIVE'
-            ? c.isActive
-            : !c.isActive
-      ).length === 0 ? (
-
-        <div className="text-center py-12">
-
-          <Layers className="w-10 h-10 mx-auto mb-3 text-stone-300" />
-
-          <p className="font-bold text-stone-700">
-            No Categories Found
-          </p>
-
-          <p className="text-xs text-stone-500 mt-2">
-            Create a new category or initialize the default categories.
-          </p>
-
-        </div>
-
-      ) : (
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-          {categories
-            .filter((c) =>
-              categoryFilter === 'ALL'
-                ? true
-                : categoryFilter === 'ACTIVE'
-                  ? c.isActive
-                  : !c.isActive
-            )
-            .map((c) => (
-
-              <div
-                key={c.id}
-                className="border border-stone-200 rounded-2xl p-4 hover:shadow-md transition-all"
-              >
-
-                <div className="flex items-center gap-3 mb-4">
-
-                  <img
-                    src={c.image || 'https://placehold.co/80x80?text=LTS'}
-                    alt={c.name}
-                    className="w-14 h-14 rounded-xl object-cover bg-stone-100"
-                  />
-
-                  <div className="min-w-0">
-
-                    <h4 className="font-bold text-sm text-stone-900">
-                      {c.name}
-                    </h4>
-
-                    <p className="text-[10px] text-stone-400 mt-1">
-                      {c._count?.products || 0} Products
-                    </p>
-
-                  </div>
-
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-
-                  <button
-                    type="button"
-                    onClick={() => handleToggleCategory(c.id, c.isActive)}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold ${
-                      c.isActive
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {c.isActive ? 'Active' : 'Inactive'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleEditCategory(c)}
-                    className="px-3 py-2 rounded-lg bg-stone-100 text-stone-700 text-xs font-bold hover:bg-stone-200"
-                  >
-                    <Edit2 className="w-3 h-3 inline mr-1" />
-                    Edit
-                  </button>
-
-                </div>
-
-              </div>
-
-            ))}
-
-        </div>
-
-      )}
-
-    </div>
-
-  </div>
-)}
-        {/* TAB 5: ORDERS MANAGEMENT */}
-        {activeTab === 'orders' && (
+{activeTab === 'orders' && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200">
               <div className="relative flex-1 max-w-md">
