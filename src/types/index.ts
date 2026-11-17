@@ -38,6 +38,7 @@ export interface Category {
 export interface ProductImage {
   id?: string;
   url: string;
+  mediaType: 'IMAGE' | 'VIDEO';
   alt?: string | null;
   isPrimary: boolean;
   displayOrder: number;
