@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
@@ -18,29 +18,17 @@ import {
   LogOut,
   Package,
 } from 'lucide-react';
-import { Category } from '@/types';
 
 export const Header: React.FC = () => {
   const router = useRouter();
   const { user, logout, isAdmin } = useAuth();
   const { items, setIsCartOpen, wishlist } = useCart();
 
-  const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<'customer' | 'admin'>('customer');
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.categories) setCategories(data.categories);
-      })
-      .catch(() => {});
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,56 +211,8 @@ export const Header: React.FC = () => {
                 All Greetings
               </Link>
 
-              {/* Dynamic Categories Dropdown */}
-              <div
-                className="relative group py-1"
-                onMouseEnter={() => setCategoryDropdownOpen(true)}
-                onMouseLeave={() => setCategoryDropdownOpen(false)}
-              >
-                <button className="flex items-center gap-1 hover:text-rose-600 transition-colors">
-                  <span>Greeting Categories</span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-
-                {categoryDropdownOpen && (
-                  <div className="absolute left-0 top-full w-72 bg-white rounded-xl shadow-xl border border-rose-100 p-2 z-50 grid grid-cols-1 gap-1">
-                    {categories.slice(0, 10).map((cat) => (
-                      <Link
-                        key={cat.id}
-                        href={`/products?category=${cat.slug}`}
-                        onClick={() => setCategoryDropdownOpen(false)}
-                        className="px-3 py-1.5 text-xs text-gray-700 hover:bg-rose-50 hover:text-rose-700 rounded-lg transition-colors flex items-center justify-between"
-                      >
-                        <span>{cat.name}</span>
-                        {cat._count?.products ? (
-                          <span className="text-[10px] text-gray-400 font-normal">
-                            ({cat._count.products})
-                          </span>
-                        ) : null}
-                      </Link>
-                    ))}
-                    <Link
-                      href="/products"
-                      onClick={() => setCategoryDropdownOpen(false)}
-                      className="px-3 py-2 text-xs text-rose-700 font-bold hover:bg-rose-50 rounded-lg border-t border-gray-100 text-center"
-                    >
-                      View All 14 Categories &rarr;
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              <Link href="/products?category=birthday-greetings" className="hover:text-rose-600 transition-colors">
-                Birthday Greetings
-              </Link>
-              <Link href="/products?category=anniversary-greetings" className="hover:text-rose-600 transition-colors">
-                Anniversary
-              </Link>
-              <Link href="/products?category=wedding-greetings" className="hover:text-rose-600 transition-colors">
-                Wedding Suite
-              </Link>
-              <Link href="/products?category=custom-greetings" className="hover:text-rose-600 transition-colors font-bold text-amber-700">
-                Custom Bespoke Cards ✨
+              <Link href="/products?featured=true" className="hover:text-rose-600 transition-colors">
+                Featured Items
               </Link>
               <Link href="/products?bestseller=true" className="hover:text-rose-600 transition-colors">
                 Best Sellers
@@ -298,35 +238,10 @@ export const Header: React.FC = () => {
             </form>
 
             <div className="space-y-2 text-sm font-medium">
-              <Link
-                href="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-1 text-gray-800 hover:text-rose-600"
-              >
-                Home
-              </Link>
-              <Link
-                href="/products"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-1 text-gray-800 hover:text-rose-600"
-              >
-                All Greetings
-              </Link>
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Top Categories
-                </p>
-                {categories.slice(0, 6).map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/products?category=${cat.slug}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-1 text-xs text-gray-700 hover:text-rose-600"
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-gray-800 hover:text-rose-600">Home</Link>
+              <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-gray-800 hover:text-rose-600">All Items</Link>
+              <Link href="/products?featured=true" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-gray-800 hover:text-rose-600">Featured Items</Link>
+              <Link href="/products?bestseller=true" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-gray-800 hover:text-rose-600">Best Sellers</Link>
             </div>
           </div>
         )}
