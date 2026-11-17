@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma';
+import { prisma } from '../../../../lib/prisma';
 import { getStripe } from '../../../../lib/stripe';
 import { getAuthUser } from '../../../../lib/auth';
 
