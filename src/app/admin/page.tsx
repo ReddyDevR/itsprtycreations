@@ -58,9 +58,8 @@ export default function AdminDashboardPage() {
   const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
   // Dynamic Greeting Form States
-  const [newTitle, setNewTitle] = useState('');
-  const [newOriginalPrice, setNewOriginalPrice] = useState('399');
-  const [newSellingPrice, setNewSellingPrice] = useState('249');
+ const [newTitle, setNewTitle] = useState('');
+const [newSellingPrice, setNewSellingPrice] = useState('249');
   const [newDescription, setNewDescription] = useState('');
   const [newDetails, setNewDetails] = useState('');
   const [newImageUrls, setNewImageUrls] = useState<string[]>([]);
@@ -155,22 +154,24 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
 
     try {
       const payload = {
-        title: newTitle,
-        originalPrice: Number(newOriginalPrice),
-        sellingPrice: Number(newSellingPrice),
-        description: newDescription,
-        details: newDetails || 'Authentic LTS Party Creations celebration greeting.',
-        stock: Number(newStock),
-        isFeatured: newIsFeatured,
-        isBestSeller: newIsBestSeller,
-        isPublished: true,
-        images: validImageUrls,
-        variations: [
-          { name: 'Format', value: 'Instant Canva Template Download', priceAdjustment: 0 },
-          { name: 'Format', value: 'Luxury 350 GSM Printed Cardstock', priceAdjustment: 350 },
-        ],
-      };
+  title: newTitle.trim(),
 
+  originalPrice: Number(newSellingPrice),
+  sellingPrice: Number(newSellingPrice),
+
+  description: newDescription,
+  details: newDetails || 'Authentic LTS Party Creations celebration greeting.',
+
+  stock: Number(newStock),
+
+  isFeatured: newIsFeatured,
+  isBestSeller: newIsBestSeller,
+  isPublished: true,
+
+  images: validImageUrls,
+
+  variations: [],
+};
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -553,35 +554,30 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
-                    Selling Price (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min={1}
-                    value={newSellingPrice}
-                    onChange={(e) => setNewSellingPrice(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                  />
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
-                    Original Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={newOriginalPrice}
-                    onChange={(e) => setNewOriginalPrice(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+  <div>
+    <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
+      Fixed Selling Price (₹) *
+    </label>
 
+    <input
+      type="number"
+      required
+      min={1}
+      step="0.01"
+      value={newSellingPrice}
+      onChange={(e) => setNewSellingPrice(e.target.value)}
+      placeholder="Enter product price"
+      className="w-full px-3 py-3 text-sm font-bold border border-stone-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"
+    />
+
+    <p className="text-[10px] text-stone-500 mt-1">
+      This is the final fixed price customers will pay.
+    </p>
+  </div>
+
+</div>
               <div className="space-y-5">
 
   {/* IMAGE SECTION HEADER */}
