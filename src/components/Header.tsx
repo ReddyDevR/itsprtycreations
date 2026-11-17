@@ -11,7 +11,6 @@ import {
   ShoppingBag,
   Heart,
   User,
-  Shield,
   Menu,
   X,
   ChevronDown,
@@ -232,7 +231,7 @@ export const Header: React.FC = () => {
         )}
       </header>
 
-      {/* Customer Authentication Modal */}
+      {/* Customer Sign In Modal; admin authentication uses the same email/password form */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
