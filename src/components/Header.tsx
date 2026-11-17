@@ -27,7 +27,7 @@ export const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authDefaultTab, setAuthDefaultTab] = useState<'customer' | 'admin'>('customer');
+  
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -175,29 +175,16 @@ export const Header: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      setAuthDefaultTab('customer');
-                      setAuthModalOpen(true);
-                    }}
-                    className="px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-1.5"
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAuthDefaultTab('admin');
-                      setAuthModalOpen(true);
-                    }}
-                    className="hidden sm:flex px-3 py-2 text-xs font-semibold text-gray-700 hover:text-amber-800 hover:bg-amber-50 rounded-xl border border-gray-200 transition-all items-center gap-1"
-                    title="Staff & Admin Portal"
-                  >
-                    <Shield className="w-3.5 h-3.5 text-amber-600" />
-                    Admin
-                  </button>
-                </div>
-              )}
+  <button
+    onClick={() => {
+      setAuthModalOpen(true);
+    }}
+    className="px-4 py-2.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-2"
+  >
+    <User className="w-4 h-4" />
+    Sign In
+  </button>
+</div>
             </div>
           </div>
 
@@ -247,12 +234,11 @@ export const Header: React.FC = () => {
         )}
       </header>
 
-      {/* Unified Auth Modal (Customer + Admin on Same Page) */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        defaultTab={authDefaultTab}
-      />
+      {/* Customer Authentication Modal */}
+<AuthModal
+  isOpen={authModalOpen}
+  onClose={() => setAuthModalOpen(false)}
+/>
     </>
   );
 };
