@@ -81,31 +81,30 @@ export default async function HomePage() {
 
   const testimonials = [
   {
-    name: 'Emily Johnson',
-    location: 'Dallas, Texas',
+    name: 'Charlotte Williams',
+    location: 'London, England',
     rating: 5,
     review:
-      'We ordered personalized birthday favor bags for our daughter’s first birthday. The designs were beautiful, the colors were vibrant, and everything looked absolutely wonderful!',
-    item: 'Personalized First Birthday Favor Suite',
+      'The personalised birthday favour bags for my daughter were absolutely beautiful. The colours, printing and attention to detail made her celebration extra special!',
+    item: 'Personalised Birthday Favor Suite',
   },
   {
-    name: 'Olivia Williams',
-    location: 'Orlando, Florida',
+    name: 'Amelia Thompson',
+    location: 'Manchester, England',
     rating: 5,
     review:
-      'The personalized anniversary cards were beautiful. The attention to detail and elegant finishing made our celebration even more special.',
-    item: 'Personalized Anniversary Keepsake Card',
+      'I ordered personalised anniversary keepsakes for my parents. The elegant design and beautiful finishing made them a wonderful gift.',
+    item: 'Golden Anniversary Keepsake Card',
   },
   {
-    name: 'Sophia Martinez',
-    location: 'Phoenix, Arizona',
+    name: 'Olivia Davies',
+    location: 'Birmingham, England',
     rating: 5,
     review:
-      'I ordered a baby shower invitation collection and absolutely loved the design. It made planning our celebration so much easier!',
-    item: 'Teddy Bear Baby Shower Collection',
+      'The baby shower invitation collection was lovely. Everything looked elegant and made organising our celebration so much easier!',
+    item: 'Teddy Bear Baby Shower Suite',
   },
 ];
-
   return (
     <div className="space-y-16 pb-20">
       {/* 1. Hero Banner */}
@@ -156,7 +155,7 @@ export default async function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
                     <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase bg-amber-400 text-gray-950 rounded-md w-fit mb-2">
-                      Handcrafted &bull; Designed for Your Celebrations
+                      Handcrafted &bull; Designed with Love
                     </span>
                     <h3 className="text-lg font-serif font-bold text-white">
                       Bespoke Greeting Cards & Party Favors
@@ -192,7 +191,7 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-gray-900">Free Nationwide Shipping</h4>
-              <p className="text-[11px] text-gray-500">Free US Shipping on Orders Over $50</p>
+              <p className="text-[11px] text-gray-500">On all orders above £50</p>
             </div>
           </div>
 
@@ -222,7 +221,7 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-gray-900">Secure Stripe Checkout</h4>
-              <p className="text-[11px] text-gray-500">UPI, Cards, Net Banking & COD</p>
+              <p className="text-[11px] text-gray-500">Secure Card Payments & Cash on Delivery</p>
             </div>
           </div>
         </div>
