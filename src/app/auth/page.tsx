@@ -342,7 +342,7 @@ export default function AuthPage() {
                     maxLength={15}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 9876543210"
+                    placeholder="+44 7700 900123"
                     className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 outline-none"
                   />
 
