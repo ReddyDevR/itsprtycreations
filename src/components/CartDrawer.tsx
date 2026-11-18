@@ -38,7 +38,7 @@ export const CartDrawer: React.FC = () => {
     if (res.success) setCouponInput('');
   };
 
-  const freeShippingThreshold = 499;
+  const freeShippingThreshold = 50;
   const amountNeededForFree = Math.max(0, freeShippingThreshold - subtotal);
   const progressPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
@@ -73,7 +73,7 @@ export const CartDrawer: React.FC = () => {
           <div className="p-3 bg-amber-50/60 border-b border-amber-100 text-xs">
             {amountNeededForFree > 0 ? (
               <p className="text-amber-900 text-center font-medium">
-                Add <span className="font-bold text-rose-700">₹{amountNeededForFree}</span> more to unlock <b>FREE Nationwide Shipping!</b>
+                Add <span className="font-bold text-rose-700">£{amountNeededForFree.toFixed(2)}</span> more to unlock <b>FREE UK Delivery!</b>
               </p>
             ) : (
               <p className="text-emerald-700 text-center font-bold flex items-center justify-center gap-1">
