@@ -1121,11 +1121,118 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
         )}
 
         {/* TAB 8: WEBSITE SETTINGS */}
-        {activeTab === 'settings' && (
-          <div className="max-w-3xl mx-auto bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
-            <h2 className="font-serif text-2xl font-bold text-stone-900">Storefront Content Settings</h2>
+        {/* PRODUCT DISPLAY CUSTOMIZATION */}
 
-            <form onSubmit={handleSaveSettings} className="space-y-4">
+<div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl space-y-5">
+
+  <div>
+    <h3 className="text-lg font-bold text-rose-950">
+      Product Display Customization
+    </h3>
+
+    <p className="text-xs text-gray-600 mt-1">
+      Customer website lo products ela display avvalo customize cheyyandi.
+    </p>
+  </div>
+
+  {/* Display Mode */}
+
+  <div>
+    <label className="block text-xs font-bold mb-2">
+      Product Display Mode
+    </label>
+
+    <select
+      value="pagination"
+      disabled
+      className="w-full p-3 rounded-xl border border-stone-200 text-sm bg-gray-100"
+    >
+      <option value="pagination">Multiple Pages (Pagination)</option>
+    </select>
+  </div>
+
+  {/* Products Per Page */}
+
+  <div>
+    <label className="block text-xs font-bold mb-2">
+      Products Per Page
+    </label>
+
+    <select
+      value={websiteSettings.product_display?.productsPerPage || 30}
+      onChange={(e) =>
+        setWebsiteSettings({
+          ...websiteSettings,
+          product_display: {
+            ...websiteSettings.product_display,
+            productsPerPage: Number(e.target.value),
+          },
+        })
+      }
+      className="w-full p-3 rounded-xl border border-stone-200 text-sm"
+    >
+      <option value="20">20 Products</option>
+      <option value="30">30 Products</option>
+      <option value="40">40 Products</option>
+      <option value="50">50 Products</option>
+    </select>
+  </div>
+
+  {/* Products Per Row */}
+
+  <div>
+    <label className="block text-xs font-bold mb-2">
+      Products Per Row
+    </label>
+
+    <select
+      value={websiteSettings.product_display?.productsPerRow || 'auto'}
+      onChange={(e) =>
+        setWebsiteSettings({
+          ...websiteSettings,
+          product_display: {
+            ...websiteSettings.product_display,
+            productsPerRow: e.target.value,
+          },
+        })
+      }
+      className="w-full p-3 rounded-xl border border-stone-200 text-sm"
+    >
+      <option value="auto">Auto Fit</option>
+      <option value="2">2 Products</option>
+      <option value="3">3 Products</option>
+      <option value="4">4 Products</option>
+    </select>
+  </div>
+
+  {/* Product Count Preview */}
+
+  <div className="bg-white p-4 rounded-xl border border-rose-100">
+
+    <p className="text-xs text-gray-500">
+      Total Products
+    </p>
+
+    <p className="text-2xl font-black text-rose-700">
+      {products.filter((p: any) => p.isPublished).length}
+    </p>
+
+    <p className="text-xs text-gray-500 mt-2">
+      Selected products per page:{' '}
+      {websiteSettings.product_display?.productsPerPage || 30}
+    </p>
+
+    <p className="text-xs text-gray-500">
+      Estimated Pages:{' '}
+      {Math.ceil(
+        products.filter((p: any) => p.isPublished).length /
+        (websiteSettings.product_display?.productsPerPage || 30)
+      )}
+    </p>
+
+  </div>
+
+</div>
               <div>
                 <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
                   Top Announcement Bar Message
