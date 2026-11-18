@@ -23,3 +23,26 @@
 .animate-fade-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+/* Product page vertical entrance animation */
+
+@keyframes productPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-page-enter {
+  animation: productPageEnter 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-page-enter {
+    animation: none;
+  }
+}
