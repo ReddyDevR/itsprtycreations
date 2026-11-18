@@ -36,7 +36,7 @@ model Address {
   city        String
   state       String
   postalCode  String
-  country     String   @default("India")
+  country     String   @default("United Kingdom")
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
