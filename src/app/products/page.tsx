@@ -13,12 +13,48 @@ interface ProductsPageProps {
     featured?: string;
     bestseller?: string;
     newarrival?: string;
+    page?: string;
   };
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { search, sort = 'newest', featured, bestseller, newarrival } = searchParams;
+  const {
+    search,
+    sort = 'newest',
+    featured,
+    bestseller,
+    newarrival,
+    page = '1',
+  } = searchParams;
 
+  // Admin saved product display settings
+  const displaySetting = await prisma.websiteSetting.findUnique({
+    where: { key: 'product_display' },
+  });
+
+  let displayConfig = {
+    productsPerPage: 30,
+    productsPerRow: 'auto',
+  };
+
+  if (displaySetting) {
+    try {
+      displayConfig = {
+        ...displayConfig,
+        ...JSON.parse(displaySetting.value),
+      };
+    } catch {
+      console.error('Invalid product display settings');
+    }
+  }
+
+  const productsPerPage = [20, 30, 40, 50].includes(
+    Number(displayConfig.productsPerPage)
+  )
+    ? Number(displayConfig.productsPerPage)
+    : 30;
+
+  const currentPage = Math.max(1, parseInt(page, 10) || 1);
   const where: any = { isPublished: true };
 
 
@@ -38,15 +74,27 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   if (sort === 'price-high') orderBy = { sellingPrice: 'desc' };
   if (sort === 'title-asc') orderBy = { title: 'asc' };
 
-  const products = await prisma.product.findMany({
-    where,
-    orderBy,
-    include: {
-      category: true,
-      images: { orderBy: { displayOrder: 'asc' } },
-      variations: true,
+  const totalProducts = await prisma.product.count({
+  where,
+});
+
+const totalPages = Math.ceil(totalProducts / productsPerPage);
+
+const safePage = Math.min(currentPage, Math.max(1, totalPages));
+
+const products = await prisma.product.findMany({
+  where,
+  orderBy,
+  skip: (safePage - 1) * productsPerPage,
+  take: productsPerPage,
+  include: {
+    category: true,
+    images: {
+      orderBy: { displayOrder: 'asc' },
     },
-  });
+    variations: true,
+  },
+});
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -68,7 +116,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {/* Filters & Results Counter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-rose-100 shadow-xs">
         <div className="text-xs text-gray-500">
-          Showing <span className="font-bold text-gray-900">{products.length}</span> greeting cards
+          Showing{' '}
+<span className="font-bold text-gray-900">
+  {totalProducts === 0
+    ? 0
+    : (safePage - 1) * productsPerPage + 1}
+  {' - '}
+  {Math.min(safePage * productsPerPage, totalProducts)}
+</span>
+{' '}of{' '}
+<span className="font-bold text-gray-900">
+  {totalProducts}
+</span>{' '}
+products
           {search && (
             <span>
               {' '}
@@ -123,13 +183,86 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             Clear Filters & View All
           </Link>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p as any} />
+     ) : (
+  <>
+    <div
+      key={safePage}
+      className={`grid gap-4 sm:gap-6 product-page-enter ${
+        displayConfig.productsPerRow === '2'
+          ? 'grid-cols-2'
+          : displayConfig.productsPerRow === '3'
+          ? 'grid-cols-2 sm:grid-cols-3'
+          : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+      }`}
+    >
+      {products.map((p) => (
+        <ProductCard key={p.id} product={p as any} />
+      ))}
+    </div>
+
+    {/* PRODUCT PAGINATION */}
+    {totalPages > 1 && (
+      <div className="flex flex-wrap justify-center items-center gap-2 pt-8">
+
+        <Link
+          href={`/products?${new URLSearchParams({
+            ...searchParams,
+            page: String(Math.max(1, safePage - 1)),
+          })}`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold border ${
+            safePage === 1
+              ? 'pointer-events-none opacity-40'
+              : 'hover:bg-rose-600 hover:text-white'
+          }`}
+        >
+          Previous
+        </Link>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter((number) =>
+            number === 1 ||
+            number === totalPages ||
+            Math.abs(number - safePage) <= 2
+          )
+          .map((number) => (
+            <Link
+              key={number}
+              href={`/products?${new URLSearchParams({
+                ...searchParams,
+                page: String(number),
+              })}`}
+              className={`w-10 h-10 flex items-center justify-center rounded-xl text-xs font-bold border transition-all ${
+                safePage === number
+                  ? 'bg-rose-600 text-white border-rose-600'
+                  : 'bg-white text-gray-700 hover:bg-rose-50'
+              }`}
+            >
+              {number}
+            </Link>
           ))}
-        </div>
-      )}
+
+        <Link
+          href={`/products?${new URLSearchParams({
+            ...searchParams,
+            page: String(Math.min(totalPages, safePage + 1)),
+          })}`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold border ${
+            safePage === totalPages
+              ? 'pointer-events-none opacity-40'
+              : 'hover:bg-rose-600 hover:text-white'
+          }`}
+        >
+          Next
+        </Link>
+
+      </div>
+    )}
+
+    <p className="text-center text-xs text-gray-500">
+      Page {safePage} of {totalPages} · {totalProducts} products available
+    </p>
+  </>
+)}
     </div>
   );
 }
