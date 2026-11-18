@@ -156,7 +156,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Create a Stripe-hosted GBP Checkout Session and redirect the customer.
+      // Create a Stripe-hosted UK GBP Checkout Session and redirect the customer.
       const stripeRes = await fetch('/api/payment/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Postal Pincode *</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">UK Postcode *</label>
                 <input
                   type="text"
                   required
@@ -399,7 +399,7 @@ export default function CheckoutPage() {
                     <span className="text-sm font-bold text-gray-900">Pay Online with Stripe</span>
                     <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded">Secure</span>
                   </span>
-                  <span className="block text-xs text-gray-600 mt-2">Pay in GBP using supported cards. Apple Pay and Google Pay may appear when eligible.</span>
+                  <span className="block text-xs text-gray-600 mt-2">Pay securely in GBP using your credit or debit card. Apple Pay and Google Pay may appear when eligible.</span>
                   <span className="block text-[11px] text-gray-500 mt-1">Payments are securely processed by Stripe.</span>
                 </span>
               </label>
