@@ -109,7 +109,7 @@ export interface Order {
   discountAmount: number;
   shippingAmount: number;
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
-  paymentMethod: 'RAZORPAY' | 'COD';
+  paymentMethod: 'STRIPE' | 'COD';
   razorpayOrderId?: string | null;
   razorpayPaymentId?: string | null;
   shippingAddress: string; // JSON stringified Address
