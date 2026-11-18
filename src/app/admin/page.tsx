@@ -411,7 +411,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs">
                 <span className="text-[11px] font-bold text-stone-400 uppercase">Total Sales</span>
-                <p className="text-2xl font-black text-rose-950 mt-1">₹{stats.totalSales}</p>
+                <p className="text-2xl font-black text-rose-950 mt-1">£{stats.totalSales}</p>
                 <span className="text-[10px] text-emerald-600 font-semibold mt-1 block">Paid Orders</span>
               </div>
 
@@ -568,7 +568,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
 
   <div>
     <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">
-      Fixed Selling Price (₹) *
+      Fixed Selling Price (£) *
     </label>
 
     <input
