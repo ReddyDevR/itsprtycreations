@@ -80,31 +80,31 @@ export default async function HomePage() {
   };
 
   const testimonials = [
-    {
-      name: 'Ananya S.',
-      location: 'Bangalore, India',
-      rating: 5,
-      review:
-        'The Pink Bow Chip Bag wrappers and birthday cards were the absolute highlight of my daughter’s 1st birthday! The paper quality and print clarity were beyond stunning.',
-      item: 'Pink Bow Custom Favor Suite',
-    },
-    {
-      name: 'Rohan Mehra',
-      location: 'Mumbai, India',
-      rating: 5,
-      review:
-        'Ordered the Golden 50th Anniversary keepsake card for my parents. The real gold foil and personalized calligraphy brought tears to their eyes. Truly heirloom quality.',
-      item: 'Golden Milestone Keepsake Card',
-    },
-    {
-      name: 'Sneha Reddy',
-      location: 'Hyderabad, India',
-      rating: 5,
-      review:
-        'The Canva templates are easy to customize and the instant delivery made planning our celebration simple.',
-      item: 'Teddy Bear Baby Shower Suite',
-    },
-  ];
+  {
+    name: 'Emily Johnson',
+    location: 'Dallas, Texas',
+    rating: 5,
+    review:
+      'We ordered personalized birthday favor bags for our daughter’s first birthday. The designs were beautiful, the colors were vibrant, and everything looked absolutely wonderful!',
+    item: 'Personalized First Birthday Favor Suite',
+  },
+  {
+    name: 'Olivia Williams',
+    location: 'Orlando, Florida',
+    rating: 5,
+    review:
+      'The personalized anniversary cards were beautiful. The attention to detail and elegant finishing made our celebration even more special.',
+    item: 'Personalized Anniversary Keepsake Card',
+  },
+  {
+    name: 'Sophia Martinez',
+    location: 'Phoenix, Arizona',
+    rating: 5,
+    review:
+      'I ordered a baby shower invitation collection and absolutely loved the design. It made planning our celebration so much easier!',
+    item: 'Teddy Bear Baby Shower Collection',
+  },
+];
 
   return (
     <div className="space-y-16 pb-20">
@@ -156,7 +156,7 @@ export default async function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
                     <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase bg-amber-400 text-gray-950 rounded-md w-fit mb-2">
-                      Handcrafted &bull; Made in India
+                      Handcrafted &bull; Designed for Your Celebrations
                     </span>
                     <h3 className="text-lg font-serif font-bold text-white">
                       Bespoke Greeting Cards & Party Favors
@@ -192,7 +192,7 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-gray-900">Free Nationwide Shipping</h4>
-              <p className="text-[11px] text-gray-500">On all orders above ₹499</p>
+              <p className="text-[11px] text-gray-500">Free US Shipping on Orders Over $50</p>
             </div>
           </div>
 
