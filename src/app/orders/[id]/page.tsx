@@ -92,7 +92,7 @@ export default async function OrderInvoicePage({ params }: PageProps) {
 
           <div className="text-right">
             <span className="text-xs text-gray-400 block">Total Amount</span>
-            <span className="text-2xl font-black text-rose-950">₹{order.totalAmount}</span>
+            <span className="text-2xl font-black text-rose-950">£{order.totalAmount}</span>
             <span className="block text-[11px] font-bold text-emerald-600 uppercase">
               Payment: {order.paymentStatus} ({order.paymentMethod})
             </span>
@@ -160,9 +160,9 @@ export default async function OrderInvoicePage({ params }: PageProps) {
             <h2 className="font-serif text-2xl font-bold text-rose-950">ITSPRTYCREATIONS</h2>
             <p className="text-xs text-amber-700 font-medium">LTS Party Creations Studio</p>
             <p className="text-[11px] text-gray-500 mt-1 max-w-xs">
-              42 Celebration Boulevard, Jubilee Hills, Hyderabad, India
+              UK
               <br />
-              support@itsprtycreations.com | +91 98765 43210
+              support@itsprtycreations.com
             </p>
           </div>
 
@@ -179,7 +179,7 @@ export default async function OrderInvoicePage({ params }: PageProps) {
             <h3 className="font-bold text-gray-900 uppercase tracking-wider mb-2">Billed To</h3>
             <p className="font-semibold text-gray-800">{order.customerName}</p>
             <p className="text-gray-500">{order.customerEmail}</p>
-            <p className="text-gray-500">+91 {order.customerPhone.replace(/^\+91/, '')}</p>
+            <p className="text-gray-500">{order.customerPhone}</p>
           </div>
 
           <div>
@@ -189,7 +189,7 @@ export default async function OrderInvoicePage({ params }: PageProps) {
             <p className="text-gray-700">
               {addressObj.city ? `${addressObj.city}, ${addressObj.state} - ${addressObj.postalCode}` : ''}
             </p>
-            <p className="text-gray-500">{addressObj.country || 'India'}</p>
+            <p className="text-gray-500">{addressObj.country || 'United Kingdom'}</p>
           </div>
         </div>
 
@@ -215,8 +215,8 @@ export default async function OrderInvoicePage({ params }: PageProps) {
                 </div>
 
                 <div className="text-right whitespace-nowrap">
-                  <p className="font-bold text-gray-900">₹{item.price * item.quantity}</p>
-                  <p className="text-[10px] text-gray-400">Qty: {item.quantity} &times; ₹{item.price}</p>
+                  <p className="font-bold text-gray-900">£{item.price * item.quantity}</p>
+                  <p className="text-[10px] text-gray-400">Qty: {item.quantity} &times; £{item.price}</p>
                 </div>
               </div>
             ))}
@@ -227,21 +227,21 @@ export default async function OrderInvoicePage({ params }: PageProps) {
         <div className="pt-4 border-t border-gray-100 max-w-xs ml-auto space-y-2 text-xs">
           <div className="flex justify-between text-gray-600">
             <span>Subtotal</span>
-            <span className="font-medium text-gray-900">₹{order.subtotal}</span>
+            <span className="font-medium text-gray-900">£{order.subtotal}</span>
           </div>
           {order.discountAmount > 0 && (
             <div className="flex justify-between text-emerald-600 font-medium">
               <span>Promotional Discount</span>
-              <span>-₹{order.discountAmount}</span>
+              <span>-£{order.discountAmount}</span>
             </div>
           )}
           <div className="flex justify-between text-gray-600">
             <span>Shipping & Handling</span>
-            <span>{order.shippingAmount === 0 ? <b className="text-emerald-600">FREE</b> : `₹${order.shippingAmount}`}</span>
+            <span>{order.shippingAmount === 0 ? <b className="text-emerald-600">FREE</b> : `£${order.shippingAmount}`}</span>
           </div>
           <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
             <span>Total Paid</span>
-            <span className="text-rose-700">₹{order.totalAmount}</span>
+            <span className="text-rose-700">£{order.totalAmount}</span>
           </div>
         </div>
       </div>
