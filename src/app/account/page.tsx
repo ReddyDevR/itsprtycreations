@@ -93,7 +93,7 @@ export default function AccountPage() {
               {user.phone && (
                 <span className="flex items-center gap-1">
                   <Phone className="w-3.5 h-3.5 text-gray-400" />
-                  +91 {user.phone.replace(/^\+91/, '')}
+                  {user.phone}
                 </span>
               )}
             </div>
@@ -171,7 +171,7 @@ export default function AccountPage() {
 
                   <div className="flex items-center gap-3">
                     {getStatusBadge(o.status)}
-                    <span className="font-bold text-sm text-gray-900">₹{o.totalAmount}</span>
+                    <span className="font-bold text-sm text-gray-900">£{o.totalAmount}</span>
                   </div>
                 </div>
 
@@ -220,7 +220,7 @@ export default function AccountPage() {
                           </p>
                         )}
                         <p className="text-gray-500 mt-1">
-                          Qty: {item.quantity} &times; ₹{item.price}
+                          Qty: {item.quantity} &times; £{item.price}
                         </p>
                       </div>
                     </div>
