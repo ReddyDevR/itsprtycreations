@@ -221,7 +221,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <label htmlFor="register-phone" className="mb-2 block text-sm font-semibold text-gray-700">Mobile Number <span className="font-normal text-gray-400">(Optional)</span></label>
-                  <input id="register-phone" type="tel" autoComplete="tel" placeholder="+91 9876543210" value={phone} onChange={(event) => setPhone(event.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100" />
+                  <input id="register-phone" type="tel" autoComplete="tel" placeholder="+44 7700 900123" value={phone} onChange={(event) => setPhone(event.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100" />
                 </div>
                 <div>
                   <label htmlFor="register-email" className="mb-2 block text-sm font-semibold text-gray-700">Email Address</label>
