@@ -1121,9 +1121,18 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
         )}
 
         {/* TAB 8: WEBSITE SETTINGS */}
-        {/* PRODUCT DISPLAY CUSTOMIZATION */}
+{activeTab === 'settings' && (
+  <div className="max-w-3xl mx-auto bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
 
-<div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl space-y-5">
+    <h2 className="font-serif text-2xl font-bold text-stone-900">
+      Storefront Content Settings
+    </h2>
+
+    <form onSubmit={handleSaveSettings} className="space-y-4">
+
+      {/* PRODUCT DISPLAY CUSTOMIZATION */}
+
+      <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl space-y-5">
 
   <div>
     <h3 className="text-lg font-bold text-rose-950">
