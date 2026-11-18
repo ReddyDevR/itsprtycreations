@@ -236,7 +236,9 @@ const discountPercent = 0;
                         <span>{v.value}</span>
                       </div>
                       <span className="font-bold">
-                        {v.priceAdjustment > 0 ? `+₹${v.priceAdjustment}` : 'Included'}
+                        {v.priceAdjustment > 0
+  ? `+£${Number(v.priceAdjustment).toFixed(2)}`
+  : 'Included'}
                       </span>
                     </button>
                   );
@@ -305,11 +307,11 @@ const discountPercent = 0;
           <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-3 text-[11px] text-gray-600">
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>Free delivery above ₹499</span>
+              <span>Free UK delivery on orders over £50</span>
             </div>
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Razorpay Verified</span>
+              <span>Secure Stripe Checkout</span>
             </div>
           </div>
         </div>
