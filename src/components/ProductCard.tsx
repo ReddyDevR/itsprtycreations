@@ -49,7 +49,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           )}
-        </Link>
+                </Link>
+
+        {/* OUT OF STOCK OVERLAY */}
+        {!product.isInStock && (
+          <div className="absolute inset-0 z-10 bg-red-950/65 backdrop-blur-[1px] flex items-center justify-center">
+            <div className="bg-white/95 px-6 py-4 rounded-2xl shadow-xl text-center border border-red-200">
+              <span className="block text-red-600 font-extrabold text-lg tracking-wider">
+                OUT OF STOCK
+              </span>
+
+              <span className="block text-gray-500 text-[10px] mt-1 font-medium">
+                Currently unavailable
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
@@ -102,12 +117,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             View Details
           </Link>
           <button
-            onClick={() => addToCart(product, 1, product.variations?.[0] || null)}
-            className="p-2 bg-rose-600 text-white rounded-xl shadow-md hover:bg-rose-700 transition-all"
-            title="Quick Add to Cart"
-          >
-            <ShoppingBag className="w-4 h-4" />
-          </button>
+  disabled={!product.isInStock}
+  onClick={() => addToCart(product, 1, product.variations?.[0] || null)}
+  className={`p-2 rounded-xl shadow-md transition-all ${
+    product.isInStock
+      ? 'bg-rose-600 text-white hover:bg-rose-700'
+      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+  }`}
+  title={product.isInStock ? 'Quick Add to Cart' : 'Out of Stock'}
+>
+  <ShoppingBag className="w-4 h-4" />
+</button>
         </div>
       </div>
 
@@ -153,13 +173,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     </span>
   </div>
 
-          <button
-            onClick={() => addToCart(product, 1, product.variations?.[0] || null)}
-            className="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-semibold rounded-lg hover:bg-rose-600 hover:text-white transition-all flex items-center gap-1"
-          >
-            <ShoppingBag className="w-3 h-3" />
-            Add to Cart
-          </button>
+         <button
+  disabled={!product.isInStock}
+  onClick={() => addToCart(product, 1, product.variations?.[0] || null)}
+  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 ${
+    product.isInStock
+      ? 'bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white'
+      : 'bg-red-100 text-red-600 cursor-not-allowed'
+  }`}
+>
+  <ShoppingBag className="w-3 h-3" />
+  {product.isInStock ? 'Add to Cart' : 'Out of Stock'}
+</button>
         </div>
       </div>
     </div>
