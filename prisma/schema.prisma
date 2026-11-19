@@ -65,10 +65,9 @@ model Product {
   originalPrice   Float
   sellingPrice    Float
   discountPercent Float              @default(0)
-  stock           Int                @default(100)
 
-  // Product availability
-  isInStock       Boolean            @default(true)
+// Product availability
+isInStock       Boolean            @default(true)
 
   isPublished     Boolean            @default(true)
   isFeatured      Boolean            @default(false)
@@ -107,7 +106,6 @@ model ProductVariation {
   name            String   // e.g., "Size", "Paper Finish", "Envelope Color"
   value           String   // e.g., "A5 Folded (5x7 in)", "Glossy Linen", "Metallic Gold"
   priceAdjustment Float    @default(0)
-  stock           Int      @default(100)
   createdAt       DateTime @default(now())
 
   product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
