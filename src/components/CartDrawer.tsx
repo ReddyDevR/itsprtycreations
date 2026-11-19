@@ -56,7 +56,7 @@ export const CartDrawer: React.FC = () => {
       className="relative z-10 w-full max-w-xl max-h-[88vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-cart-popup"
       onClick={(e) => e.stopPropagation()}
     >
-          {/* Header */}
+  {/* Header */}
           <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-rose-50/50">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-rose-600" />
@@ -268,6 +268,5 @@ export const CartDrawer: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
