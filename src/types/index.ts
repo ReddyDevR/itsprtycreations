@@ -49,7 +49,6 @@ export interface ProductVariation {
   name: string;
   value: string;
   priceAdjustment: number;
-  stock: number;
 }
 
 export interface Product {
@@ -60,7 +59,6 @@ export interface Product {
   originalPrice: number;
   sellingPrice: number;
   discountPercent: number;
-  stock: number;
 
   isInStock: boolean;
 
