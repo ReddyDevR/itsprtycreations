@@ -149,7 +149,6 @@ if (Array.isArray(body.images)) {
           name: v.name || 'Option',
           value: v.value || 'Standard',
           priceAdjustment: Number(v.priceAdjustment) || 0,
-          stock: Number(v.stock) || 100,
         })),
       });
     }
@@ -162,8 +161,6 @@ if (Array.isArray(body.images)) {
         originalPrice: origPrice,
         sellingPrice: sellPrice,
         discountPercent,
-        stock: body.stock !== undefined ? Number(body.stock) : existing.stock,
-
         isInStock:
         body.isInStock !== undefined
         ? Boolean(body.isInStock)
