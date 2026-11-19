@@ -42,16 +42,20 @@ export const CartDrawer: React.FC = () => {
   const amountNeededForFree = Math.max(0, freeShippingThreshold - subtotal);
   const progressPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden animate-fade-in">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-        onClick={() => setIsCartOpen(false)}
-      />
+ return (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-fade-in">
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+    {/* Background Overlay */}
+    <div
+      className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      onClick={() => setIsCartOpen(false)}
+    />
+
+    {/* Center Shopping Cart Popup */}
+    <div
+      className="relative z-10 w-full max-w-xl max-h-[88vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-cart-popup"
+      onClick={(e) => e.stopPropagation()}
+    >
           {/* Header */}
           <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-rose-50/50">
             <div className="flex items-center gap-2">
