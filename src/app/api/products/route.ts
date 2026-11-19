@@ -103,21 +103,20 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      title,
-      description,
-      originalPrice,
-      sellingPrice,
-      stock,
-      details,
-      specifications,
-      isFeatured,
-      isBestSeller,
-      isNewArrival,
-      isPublished,
-      images,
-      variations,
-    } = body;
+const {
+  title,
+  description,
+  originalPrice,
+  sellingPrice,
+  details,
+  specifications,
+  isFeatured,
+  isBestSeller,
+  isNewArrival,
+  isPublished,
+  images,
+  variations,
+} = body;
 
     if (
   !title?.trim() ||
@@ -208,7 +207,7 @@ const discountPercent = 0;
         originalPrice: origPrice,
         sellingPrice: sellPrice,
         discountPercent,
-        stock: Number(stock) || 100,
+        isInStock: true,
         categoryId: allItemsCategory.id,
         details: details || '',
         specifications: specifications ? (typeof specifications === 'string' ? specifications : JSON.stringify(specifications)) : null,
@@ -230,7 +229,6 @@ const discountPercent = 0;
             name: v.name || 'Option',
             value: v.value || 'Standard',
             priceAdjustment: Number(v.priceAdjustment) || 0,
-            stock: Number(v.stock) || 100,
           })),
         },
       },
