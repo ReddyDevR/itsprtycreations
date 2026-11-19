@@ -944,7 +944,27 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                               '-'
                             )}
                           </td>
-                          <td className="py-3 px-4 text-stone-600">{p.stock}</td>
+                          <td className="py-3 px-4">
+  <button
+    type="button"
+    onClick={() =>
+      handleStockAvailability(p, !p.isInStock)
+    }
+    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold transition-all border ${
+      p.isInStock
+        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+        : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+    }`}
+  >
+    <span
+      className={`w-2 h-2 rounded-full ${
+        p.isInStock ? 'bg-emerald-500' : 'bg-red-500'
+      }`}
+    />
+
+    {p.isInStock ? 'In Stock' : 'Out of Stock'}
+  </button>
+</td>
                           <td className="py-3 px-4">
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
