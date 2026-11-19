@@ -70,18 +70,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        {/* Wishlist Button */}
-        <button
-          onClick={() => toggleWishlist(product.id)}
-          className={`absolute top-2.5 right-2.5 p-2 rounded-full transition-all shadow-sm ${
-            isFavorited
-              ? 'bg-rose-50 text-rose-600'
-              : 'bg-white/80 text-gray-500 hover:text-rose-600 hover:bg-white'
-          }`}
-          title={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
-        >
-          <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current text-rose-600' : ''}`} />
-        </button>
+       {/* Wishlist Button */}
+<button
+  type="button"
+  onClick={() => toggleWishlist(product.id)}
+  className={`absolute top-2.5 right-2.5 z-20 p-2.5 rounded-full transition-all duration-200 shadow-md ${
+    isFavorited
+      ? 'bg-rose-100 text-rose-600 scale-110'
+      : 'bg-white/90 text-gray-500 hover:text-rose-600 hover:bg-white'
+  }`}
+  title={isFavorited ? 'Remove from favourites' : 'Add to favourites'}
+  aria-label={isFavorited ? 'Remove from favourites' : 'Add to favourites'}
+  aria-pressed={isFavorited}
+>
+  <Heart
+    className={`w-5 h-5 transition-all ${
+      isFavorited
+        ? 'fill-rose-600 text-rose-600'
+        : 'fill-transparent'
+    }`}
+  />
+</button>
 
         {/* Quick View Button on Hover */}
         <div className="absolute inset-x-3 bottom-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
