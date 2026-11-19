@@ -87,13 +87,23 @@ export async function POST(req: NextRequest) {
       });
 
       if (!product) {
-        return NextResponse.json(
-          { error: `Product not found: ${item.productId}` },
-          { status: 400 }
-        );
-      }
+  return NextResponse.json(
+    { error: `Product not found: ${item.productId}` },
+    { status: 400 }
+  );
+}
 
-      let itemPrice = product.sellingPrice;
+// Prevent purchasing unavailable products
+if (!product.isInStock) {
+  return NextResponse.json(
+    {
+      error: `${product.title} is currently Out of Stock. Please remove it from your cart.`,
+    },
+    { status: 409 }
+  );
+}
+
+let itemPrice = product.sellingPrice;
       if (item.variationPriceAdjustment) {
         itemPrice += Number(item.variationPriceAdjustment);
       }
