@@ -91,12 +91,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [wishlist]);
 
   const addToCart = (
-    product: Product,
-    quantity: number = 1,
-    variation: ProductVariation | null = null,
-    personalization: string | null = null
-  ) => {
-    const itemPrice = product.sellingPrice + (variation ? variation.priceAdjustment : 0);
+  product: Product,
+  quantity: number = 1,
+  variation: ProductVariation | null = null,
+  personalization: string | null = null
+) => {
+
+  if (!product.isInStock) {
+    alert('Sorry! This product is currently Out of Stock.');
+    return;
+  }
+
+  const itemPrice = product.sellingPrice + (variation ? variation.priceAdjustment : 0);
     const itemId = `${product.id}-${variation?.value || 'standard'}-${personalization || 'none'}`;
 
     setItems((prev) => {
