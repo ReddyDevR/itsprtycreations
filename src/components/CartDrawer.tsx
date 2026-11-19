@@ -138,12 +138,23 @@ export const CartDrawer: React.FC = () => {
                     )}
 
                     <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-sm font-bold text-gray-900">₹{item.price}</span>
-                        {item.originalPrice > item.price && (
-                          <span className="text-[10px] text-gray-400 line-through">₹{item.originalPrice}</span>
-                        )}
-                      </div>
+                      <div className="flex flex-col gap-1">
+
+  <span className="text-xs text-gray-500">
+    Unit Price: ₹{item.price.toFixed(2)}
+  </span>
+
+  <span className="text-sm font-bold text-rose-700">
+    Total: ₹{(item.price * item.quantity).toFixed(2)}
+  </span>
+
+  {item.originalPrice > item.price && (
+    <span className="text-[10px] text-gray-400 line-through">
+      ₹{item.originalPrice.toFixed(2)}
+    </span>
+  )}
+
+</div>
 
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
