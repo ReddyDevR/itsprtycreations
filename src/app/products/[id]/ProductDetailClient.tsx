@@ -282,25 +282,47 @@ const discountPercent = 0;
                 +
               </button>
             </div>
-            <span className="text-[11px] text-emerald-600 font-medium">In Stock & Ready</span>
+            <span
+  className={`text-[11px] font-bold ${
+    product.isInStock
+      ? 'text-emerald-600'
+      : 'text-red-600'
+  }`}
+>
+  {product.isInStock
+    ? 'In Stock & Ready'
+    : 'OUT OF STOCK'}
+</span>
           </div>
 
           {/* CTAs: Add to Cart & Buy Now */}
           <div className="space-y-2.5 pt-4">
             <button
-              onClick={handleAddToCart}
-              className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition-all shadow-md shadow-rose-200 flex items-center justify-center gap-2"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Add to Shopping Cart
-            </button>
+  disabled={!product.isInStock}
+  onClick={handleAddToCart}
+  className={`w-full py-3.5 font-bold text-xs tracking-wider uppercase rounded-xl transition-all flex items-center justify-center gap-2 ${
+    product.isInStock
+      ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-200'
+      : 'bg-red-100 text-red-600 cursor-not-allowed'
+  }`}
+>
+  <ShoppingBag className="w-4 h-4" />
+  {product.isInStock ? 'Add to Shopping Cart' : 'Out of Stock'}
+</button>
             <button
-              onClick={handleBuyNow}
-              className="w-full py-3.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              <Zap className="w-4 h-4 text-amber-400" />
-              Buy It Now &bull; Instant Checkout
-            </button>
+  disabled={!product.isInStock}
+  onClick={handleBuyNow}
+  className={`w-full py-3.5 font-bold text-xs tracking-wider uppercase rounded-xl transition-all flex items-center justify-center gap-2 ${
+    product.isInStock
+      ? 'bg-stone-900 hover:bg-stone-800 text-white shadow-md'
+      : 'bg-red-100 text-red-600 cursor-not-allowed'
+  }`}
+>
+  <Zap className="w-4 h-4" />
+  {product.isInStock
+    ? 'Buy It Now • Instant Checkout'
+    : 'Currently Unavailable'}
+</button>
           </div>
 
           {/* Guarantee Badges */}
