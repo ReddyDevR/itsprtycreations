@@ -69,7 +69,7 @@ const [newSellingPrice, setNewSellingPrice] = useState('249');
 // Product Image Management
 const [imageSource, setImageSource] = useState<'url'>('url');
 const [imageLimit, setImageLimit] = useState(6);
-  const [newStock, setNewStock] = useState('100');
+  
   const [newIsFeatured, setNewIsFeatured] = useState(false);
   const [newIsBestSeller, setNewIsBestSeller] = useState(false);
   const [submittingGreeting, setSubmittingGreeting] = useState(false);
@@ -164,8 +164,6 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
   description: newDescription,
   details: newDetails || 'Authentic LTS Party Creations celebration greeting.',
 
-  stock: Number(newStock),
-
   isFeatured: newIsFeatured,
   isBestSeller: newIsBestSeller,
   isPublished: true,
@@ -226,7 +224,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
   originalPrice: editingProduct.sellingPrice,
   sellingPrice: editingProduct.sellingPrice,
 
-  stock: editingProduct.stock,
+  isInStock: editingProduct.isInStock ?? true,
   isPublished: editingProduct.isPublished,
   isFeatured: editingProduct.isFeatured,
   isBestSeller: editingProduct.isBestSeller,
@@ -902,8 +900,8 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                       <th className="py-3 px-4">Category</th>
                       <th className="py-3 px-4">Selling Price</th>
                       <th className="py-3 px-4">Discount</th>
-                      <th className="py-3 px-4">Stock</th>
-                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Stock Availability</th>
+                     <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -1420,17 +1418,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
     </p>
   </div>
 </div>
-              <div>
-                <label className="block text-xs font-medium text-stone-700 mb-1">Stock Quantity</label>
-                <input
-                  type="number"
-                  value={editingProduct.stock}
-                  onChange={(e) =>
-                    setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })
-                  }
-                  className="w-full px-3 py-2 text-xs border border-stone-200 rounded-xl"
-                />
-              </div>
+              
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 mb-1">Description</label>
