@@ -127,19 +127,28 @@ export const Header: React.FC = () => {
 
             {/* Action Buttons: Wishlist, Cart, User / Admin Auth */}
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Wishlist Link */}
-              <Link
-                href="/products"
-                className="relative p-2 text-gray-700 hover:text-rose-600 transition-colors hidden sm:block"
-                title="Wishlist"
-              >
-                <Heart className="w-5 h-5" />
-                {wishlist.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {wishlist.length}
-                  </span>
-                )}
-              </Link>
+              {/* Wishlist Button */}
+<button
+  type="button"
+  onClick={openWishlist}
+  className="relative p-2 text-gray-700 hover:text-rose-600 transition-colors"
+  title="View Favourite Products"
+  aria-label="Open favourites"
+>
+  <Heart
+    className={`w-5 h-5 transition-all ${
+      wishlist.length > 0
+        ? 'fill-rose-600 text-rose-600'
+        : 'text-gray-700'
+    }`}
+  />
+
+  {wishlist.length > 0 && (
+    <span className="absolute top-0 right-0 min-w-4 h-4 px-1 bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+      {wishlist.length}
+    </span>
+  )}
+</button>
 
               {/* Shopping Cart Button */}
               <button
@@ -279,10 +288,214 @@ export const Header: React.FC = () => {
       </header>
 
       {/* Customer Sign In Modal; admin authentication uses the same email/password form */}
-      <AuthModal
+            <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
       />
+
+      {/* Favourite Products Popup */}
+      {wishlistOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5">
+
+          {/* Background */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setWishlistOpen(false)}
+          />
+
+          {/* Popup */}
+          <div
+            className="relative z-10 w-full max-w-3xl max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-cart-popup"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            {/* Popup Header */}
+            <div className="px-5 py-4 bg-rose-50 border-b border-rose-100 flex items-center justify-between shrink-0">
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
+                  <Heart className="w-5 h-5 fill-rose-600 text-rose-600" />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    My Favourites
+                  </h2>
+
+                  <p className="text-xs text-gray-500">
+                    {wishlist.length} saved products
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setWishlistOpen(false)}
+                className="p-2 rounded-full hover:bg-rose-100 text-gray-600 hover:text-rose-600"
+                aria-label="Close favourites"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Favourite Products */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 bg-gray-50">
+
+              {wishlistLoading ? (
+                <div className="py-16 text-center">
+                  <div className="w-9 h-9 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin mx-auto" />
+
+                  <p className="mt-4 text-sm text-gray-500">
+                    Loading your favourite products...
+                  </p>
+                </div>
+              ) : favoriteProducts.length === 0 ? (
+                <div className="py-16 flex flex-col items-center justify-center text-center">
+
+                  <Heart className="w-16 h-16 text-rose-200 mb-4" />
+
+                  <h3 className="text-lg font-bold text-gray-800">
+                    No Favourite Products
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mt-2">
+                    Click the heart icon on any product to save it here.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWishlistOpen(false);
+                      router.push('/products');
+                    }}
+                    className="mt-5 px-5 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-semibold hover:bg-rose-700"
+                  >
+                    Explore Products
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+
+                  {favoriteProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center gap-3 sm:gap-5 p-3 bg-white rounded-xl border border-gray-200 shadow-sm"
+                    >
+
+                      {/* Product Image */}
+                      <Link
+                        href={`/products/${product.slug || product.id}`}
+                        onClick={() => setWishlistOpen(false)}
+                        className="w-20 h-20 sm:w-28 sm:h-28 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-100"
+                      >
+                        <img
+                          src={
+                            product.images?.[0]?.url ||
+                            '/placeholder.png'
+                          }
+                          alt={product.title}
+                          className="w-full h-full object-contain"
+                        />
+                      </Link>
+
+                      {/* Product Details */}
+                      <div className="flex-1 min-w-0">
+
+                        <Link
+                          href={`/products/${product.slug || product.id}`}
+                          onClick={() => setWishlistOpen(false)}
+                          className="text-sm sm:text-base font-bold text-gray-900 hover:text-rose-600 line-clamp-2"
+                        >
+                          {product.title}
+                        </Link>
+
+                        <p className="text-base font-bold text-rose-700 mt-2">
+                          £{Number(product.sellingPrice).toFixed(2)}
+                        </p>
+
+                        <p className="text-xs text-emerald-600 mt-1">
+                          {product.stock > 0
+                            ? 'In Stock'
+                            : 'Currently Unavailable'}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+
+                          <button
+                            type="button"
+                            disabled={product.stock <= 0}
+                            onClick={() => {
+                              addToCart(
+                                product,
+                                1,
+                                product.variations?.[0] || null
+                              );
+                              setWishlistOpen(false);
+                            }}
+                            className="px-3 py-2 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            <ShoppingBag className="w-3.5 h-3.5" />
+                            Add to Cart
+                          </button>
+
+                          <Link
+                            href={`/products/${product.slug || product.id}`}
+                            onClick={() => setWishlistOpen(false)}
+                            className="px-3 py-2 border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                          >
+                            View Product
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+
+                        </div>
+                      </div>
+
+                      {/* Remove Favourite */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toggleWishlist(product.id);
+
+                          setFavoriteProducts((prev) =>
+                            prev.filter((p) => p.id !== product.id)
+                          );
+                        }}
+                        className="shrink-0 p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        title="Remove from favourites"
+                        aria-label="Remove favourite"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+
+                    </div>
+                  ))}
+
+                </div>
+              )}
+            </div>
+
+            {/* Popup Footer */}
+            {favoriteProducts.length > 0 && (
+              <div className="shrink-0 p-4 border-t border-gray-100 bg-white flex items-center justify-between">
+
+                <span className="text-sm text-gray-500">
+                  {favoriteProducts.length} favourite products
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setWishlistOpen(false)}
+                  className="px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-rose-600 transition-all"
+                >
+                  Continue Shopping
+                </button>
+
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
     </>
   );
 };
