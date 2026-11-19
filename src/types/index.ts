@@ -61,6 +61,9 @@ export interface Product {
   sellingPrice: number;
   discountPercent: number;
   stock: number;
+
+  isInStock: boolean;
+
   isPublished: boolean;
   isFeatured: boolean;
   isBestSeller: boolean;
