@@ -489,7 +489,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                                 {ord.status}
                               </span>
                             </td>
-                            <td className="py-2.5 font-bold text-stone-900">₹{ord.totalAmount}</td>
+                            <td className="py-2.5 font-bold text-stone-900">£{ord.totalAmount}</td>
                             <td className="py-2.5">
                               <button
                                 onClick={() => {
@@ -893,7 +893,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                             </div>
                           </td>
                           <td className="py-3 px-4 text-stone-600">All Items</td>
-                          <td className="py-3 px-4 font-bold text-stone-900">₹{p.sellingPrice}</td>
+                          <td className="py-3 px-4 font-bold text-stone-900">£{p.sellingPrice}</td>
                           <td className="py-3 px-4">
                             {p.discountPercent > 0 ? (
                               <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">
@@ -1015,7 +1015,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                             </p>
                           </td>
                           <td className="py-3 px-4">{o.items?.length || 0} items</td>
-                          <td className="py-3 px-4 font-bold text-stone-900">₹{o.totalAmount}</td>
+                          <td className="py-3 px-4 font-bold text-stone-900">£{o.totalAmount}</td>
                           <td className="py-3 px-4">
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -1110,7 +1110,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                             {new Date(c.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4 font-bold text-stone-800">{c.totalOrders}</td>
-                          <td className="py-3 px-4 font-bold text-emerald-600">₹{c.totalSpent}</td>
+                          <td className="py-3 px-4 font-bold text-emerald-600">£{c.totalSpent}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -1335,7 +1335,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
               <div className="grid grid-cols-1 gap-3">
   <div>
     <label className="block text-xs font-bold text-stone-700 mb-1">
-      Fixed Selling Price (₹) *
+      Fixed Selling Price (£) *
     </label>
 
     <input
@@ -1545,7 +1545,7 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
                     <span>
                       {it.quantity}&times; {it.title} {it.variation ? `(${it.variation})` : ''}
                     </span>
-                    <span className="font-bold text-stone-900">₹{it.price * it.quantity}</span>
+                    <span className="font-bold text-stone-900">£{it.price * it.quantity}</span>
                   </div>
                 ))}
               </div>
