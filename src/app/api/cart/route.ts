@@ -62,8 +62,27 @@ export async function POST(req: NextRequest) {
 
     const qty = Math.max(1, Number(quantity) || 1);
 
-    // Check if item already in cart
-    const existing = await prisma.cartItem.findFirst({
+// Verify product availability
+const product = await prisma.product.findUnique({
+  where: { id: productId },
+});
+
+if (!product) {
+  return NextResponse.json(
+    { error: 'Product not found.' },
+    { status: 404 }
+  );
+}
+
+if (!product.isInStock) {
+  return NextResponse.json(
+    { error: 'Sorry! This product is Out of Stock.' },
+    { status: 409 }
+  );
+}
+
+// Check if item already in cart
+const existing = await prisma.cartItem.findFirst({
       where: {
         productId,
         userId: user ? user.id : null,
