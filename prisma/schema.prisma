@@ -66,6 +66,10 @@ model Product {
   sellingPrice    Float
   discountPercent Float              @default(0)
   stock           Int                @default(100)
+
+  // Product availability
+  isInStock       Boolean            @default(true)
+
   isPublished     Boolean            @default(true)
   isFeatured      Boolean            @default(false)
   isBestSeller    Boolean            @default(false)
