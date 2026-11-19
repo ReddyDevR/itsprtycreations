@@ -413,17 +413,17 @@ export const Header: React.FC = () => {
                           £{Number(product.sellingPrice).toFixed(2)}
                         </p>
 
-                        <p className="text-xs text-emerald-600 mt-1">
-                          {product.stock > 0
-                            ? 'In Stock'
-                            : 'Currently Unavailable'}
-                        </p>
+                        <p className={`text-xs mt-1 font-semibold ${
+  product.isInStock ? 'text-emerald-600' : 'text-red-600'
+}`}>
+  {product.isInStock ? 'In Stock' : 'Out of Stock'}
+</p>
 
                         <div className="flex flex-wrap items-center gap-2 mt-3">
 
                           <button
                             type="button"
-                            disabled={product.stock <= 0}
+                            disabled={!product.isInStock}
                             onClick={() => {
                               addToCart(
                                 product,
