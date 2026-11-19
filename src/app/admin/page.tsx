@@ -242,6 +242,47 @@ if (validImageUrls.length > imageLimit || validImageUrls.length > 6) {
     } catch (err: any) {
       notify(err.message, true);
     }
+    };
+
+  // UPDATE PRODUCT STOCK AVAILABILITY
+  const handleStockAvailability = async (
+    product: Product,
+    isInStock: boolean
+  ) => {
+    try {
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isInStock,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update availability');
+      }
+
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === product.id
+            ? { ...item, isInStock }
+            : item
+        )
+      );
+
+      notify(
+        isInStock
+          ? `"${product.title}" is now In Stock.`
+          : `"${product.title}" is now Out of Stock.`
+      );
+
+    } catch (error: any) {
+      notify(error.message, true);
+    }
   };
 
   // DELETE PRODUCT
