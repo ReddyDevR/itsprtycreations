@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { AuthModal } from './AuthModal';
+import { Product } from '../types';
 import {
   Search,
   ShoppingBag,
@@ -17,17 +18,32 @@ import {
   LogOut,
   Package,
   Shield,
+  Trash2,
+  ArrowRight,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const router = useRouter();
+
   const { user, logout, isAdmin } = useAuth();
-  const { items, setIsCartOpen, wishlist } = useCart();
+
+  const {
+    items,
+    setIsCartOpen,
+    wishlist,
+    toggleWishlist,
+    addToCart,
+  } = useCart();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+
+  // Wishlist Popup
+  const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +52,36 @@ export const Header: React.FC = () => {
   };
 
   const totalCartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    // Load favourite products from the Products API
+  const openWishlist = async () => {
+    setWishlistOpen(true);
+    setWishlistLoading(true);
+
+    try {
+      const response = await fetch('/api/products');
+
+      if (!response.ok) {
+        throw new Error('Unable to load favourite products');
+      }
+
+      const data = await response.json();
+
+      const allProducts: Product[] = Array.isArray(data.products)
+        ? data.products
+        : [];
+
+      const selectedProducts = allProducts.filter((product) =>
+        wishlist.includes(product.id)
+      );
+
+      setFavoriteProducts(selectedProducts);
+    } catch (error) {
+      console.error('Wishlist loading error:', error);
+      setFavoriteProducts([]);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   return (
     <>
