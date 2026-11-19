@@ -163,6 +163,12 @@ if (Array.isArray(body.images)) {
         sellingPrice: sellPrice,
         discountPercent,
         stock: body.stock !== undefined ? Number(body.stock) : existing.stock,
+
+        isInStock:
+        body.isInStock !== undefined
+        ? Boolean(body.isInStock)
+        : existing.isInStock,
+
         categoryId: body.categoryId || existing.categoryId,
         details: body.details !== undefined ? body.details : existing.details,
         specifications: body.specifications !== undefined
